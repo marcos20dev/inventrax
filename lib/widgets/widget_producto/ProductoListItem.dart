@@ -18,7 +18,7 @@ class ProductoListItem extends StatelessWidget {
     required this.producto,
     required this.primaryColor,
     this.onEdit, // ← ya no es requerido
-    required this.onDelete,
+    required this.onDelete, required IconButton trailing,
   }) : super(key: key);
 
   @override
@@ -29,6 +29,7 @@ class ProductoListItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Dismissible(
         key: Key(producto['id_producto'].toString()),
+        direction: DismissDirection.horizontal, // Asegúrate de que sea horizontal
         background: Container(
           decoration: BoxDecoration(
             color: Colors.red.withOpacity(0.1),
@@ -49,9 +50,11 @@ class ProductoListItem extends StatelessWidget {
         ),
         confirmDismiss: (direction) async {
           if (direction == DismissDirection.startToEnd) {
+            // Acción para eliminar el producto
             onDelete(producto['id_producto']);
             return false;
           } else {
+            // Acción para editar el producto
             if (onEdit != null) {
               onEdit!(producto['id_producto']);
             }

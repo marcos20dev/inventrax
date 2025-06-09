@@ -8,6 +8,9 @@ class CategoriaRepository {
 
   CategoriaRepository(this.supabase);
 
+
+
+
   Future<List<Categoria>> getAll() async {
     try {
       final response = await supabase

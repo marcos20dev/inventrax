@@ -91,13 +91,11 @@ class _ProveedorFormScreenState extends State<ProveedorFormScreen> {
   }
 
   void _submitForm() async {
-    // Validar formulario
     if (!_formKey.currentState!.validate()) return;
 
-    // Mostrar loading
     setState(() => _isSubmitting = true);
+    print("Creando un nuevo proveedor...");
 
-    // Crear modelo con datos del formulario
     final proveedor = Proveedor(
       idProveedor: widget.proveedor?['id_proveedor'] ?? widget.proveedor?['id'],
       nombreProveedor: _nombreProveedorController.text.trim(),
@@ -106,14 +104,10 @@ class _ProveedorFormScreenState extends State<ProveedorFormScreen> {
       direccion: _direccionController.text.trim(),
     );
 
-    // Verificar si el idProveedor está correctamente asignado
-    print("Botón presionado. ID proveedor: ${proveedor.idProveedor}");
-
     try {
       final success = await context.read<ProveedorViewModel>().saveProveedor(proveedor);
 
       if (!mounted) return;
-
       setState(() => _isSubmitting = false);
 
       if (success) {
@@ -126,37 +120,21 @@ class _ProveedorFormScreenState extends State<ProveedorFormScreen> {
         );
 
         if (widget.proveedor == null) {
-          // Limpiar formulario si es nuevo registro
-          _nombreProveedorController.clear();
-          _telefonoController.clear();
-          _correoController.clear();
-          _direccionController.clear();
-          _proveedorSeleccionado = null;
-          _formKey.currentState?.reset();
+          // Recargar la página completamente
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProveedorFormScreen(),
+            ),
+          );
         } else {
           Navigator.of(context).pop(true);
         }
-      } else {
-        final errorMsg = context.read<ProveedorViewModel>().errorMessage;
-        showNotificationToast(
-          context,
-          message: errorMsg ?? 'Error al registrar el proveedor',
-          type: NotificationType.error,
-        );
       }
     } catch (e) {
-      if (!mounted) return;
-
-      setState(() => _isSubmitting = false);
-
-      showNotificationToast(
-        context,
-        message: e.toString(),
-        type: NotificationType.error,
-      );
+      // Manejo de errores...
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

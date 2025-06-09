@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:inventrax/models/producto.dart';
 import 'package:inventrax/views/catologo/productos_form.dart';
 import 'package:provider/provider.dart';
-
 import '../../repositories/producto_repository.dart';
 import '../../viewmodels/producto_viewmodel.dart';
 import '../../widgets/widget_drawer/base_scaffold.dart';
@@ -66,7 +66,8 @@ class _ProductoListScreenState extends State<ProductoListScreen> {
 
     setState(() {
       _displayedProductos = _displayedProductos
-          .where((prod) => prod['nombre_producto'].toLowerCase().contains(query))
+          .where((prod) =>
+          prod['nombre_producto'].toLowerCase().contains(query))
           .toList();
     });
   }
@@ -78,7 +79,8 @@ class _ProductoListScreenState extends State<ProductoListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Confirmar eliminación', style: TextStyle(color: _getPrimaryColor(context))),
+        title: Text('Confirmar eliminación',
+            style: TextStyle(color: _getPrimaryColor(context))),
         content: const Text('¿Estás seguro de que quieres eliminar este producto?'),
         actions: [
           TextButton(
@@ -116,6 +118,205 @@ class _ProductoListScreenState extends State<ProductoListScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return isDark ? Colors.tealAccent.shade400 : Colors.teal.shade400;
+  }
+
+  void _showProductDetailsModal(Map<String, dynamic> producto) {
+    final TextEditingController _nombreController = TextEditingController(text: producto['nombre_producto']);
+    final TextEditingController _descripcionController = TextEditingController(text: producto['descripcion']);
+    final TextEditingController _cantidadController = TextEditingController(text: producto['cantidad_disponible'].toString());
+    final TextEditingController _precioVentaController = TextEditingController(text: producto['precio_venta'].toString());
+    final TextEditingController _proveedorController = TextEditingController(text: producto['proveedor']?.toString() ?? '');
+    final TextEditingController _codigoBarrasController = TextEditingController(text: producto['codigo_barras']?.toString() ?? '');
+    final TextEditingController _precioCompraController = TextEditingController(text: producto['precio_compra']?.toString() ?? '');
+
+    String? _selectedCategoria = producto['categoria']; // Asignar la categoría seleccionada
+
+    // Lista de categorías, reemplaza esto con las categorías reales disponibles
+    List<String> categorias = ['Electrónica', 'Ropa', 'Alimentos', 'Juguetes'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Editar Producto',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: _getPrimaryColor(context),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Categoría
+                const SizedBox(height: 20),
+                Text(
+                  'Categoría',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: _getPrimaryColor(context),
+                  ),
+                ),
+                DropdownButton<String>(
+                  value: _selectedCategoria,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedCategoria = newValue;
+                    });
+                  },
+                  items: categorias.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+
+                // Código de barras
+                _buildEditableRow('Código de Barras', _codigoBarrasController),
+
+                // Nombre
+                _buildEditableRow('Nombre', _nombreController),
+
+                // Descripción
+                _buildEditableRow('Descripción', _descripcionController),
+
+                // Cantidad
+                _buildEditableRow('Cantidad', _cantidadController),
+
+                // Precio de venta
+                _buildEditableRow('Precio de venta', _precioVentaController),
+
+                // Selección de proveedor
+                const SizedBox(height: 20),
+                Text(
+                  'Proveedor',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: _getPrimaryColor(context),
+                  ),
+                ),
+                _buildEditableRow('Proveedor', _proveedorController),
+
+                // Precio de compra
+                _buildEditableRow('Precio de compra', _precioCompraController),
+
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final updatedProducto = {
+                            'id_producto': producto['id_producto'],
+                            'nombre_producto': _nombreController.text,
+                            'descripcion': _descripcionController.text,
+                            'cantidad_disponible': int.tryParse(_cantidadController.text) ?? 0,
+                            'precio_venta': double.tryParse(_precioVentaController.text) ?? 0.0,
+                            'proveedor': _proveedorController.text,
+                            'categoria': _selectedCategoria,
+                            'codigo_barras': _codigoBarrasController.text,
+                            'precio_compra': double.tryParse(_precioCompraController.text) ?? 0.0,
+                          };
+
+                          context.read<ProductoViewModel>().updateProduct(updatedProducto as Producto).then((success) {
+                            if (success) {
+                              showNotificationToast(context, message: 'Producto actualizado', type: NotificationType.success);
+                              Navigator.pop(context);
+                              _fetchProductos();
+                            } else {
+                              showNotificationToast(context, message: 'Error al actualizar producto', type: NotificationType.error);
+                            }
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _getPrimaryColor(context),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                        ),
+                        child: const Text(
+                          'Actualizar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+
+  Widget _buildEditableRow(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+                label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                )),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -166,6 +367,40 @@ class _ProductoListScreenState extends State<ProductoListScreen> {
                     producto: producto,
                     primaryColor: primaryColor,
                     onDelete: (id) => _deleteProducto(id),
+                    onEdit: (id) => _showProductDetailsModal(producto),
+                    trailing: IconButton(  // Aquí pasamos el IconButton para trailing
+                      icon: Icon(Icons.more_vert, color: Colors.grey),
+                      onPressed: () {
+                        // Este es el modal de opciones
+                        showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                          ),
+                          builder: (context) => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: Icon(Icons.edit, color: primaryColor),
+                                title: const Text('Editar'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _showProductDetailsModal(producto);
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.delete, color: Colors.red),
+                                title: const Text('Eliminar'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _deleteProducto(producto['id_producto']);
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

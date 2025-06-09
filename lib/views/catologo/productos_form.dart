@@ -10,8 +10,6 @@ import '../../viewmodels/categoria_viewmodel.dart';
 import '../../viewmodels/producto_viewmodel.dart';
 import '../../viewmodels/proveedor_viewmodel.dart';
 import '../../widgets/widget_drawer/base_scaffold.dart';
-import '../../widgets/widget_producto/DropdownField.dart';
-import '../../widgets/widget_producto/ProductoTextField.dart';
 import '../../widgets/widget_producto/ScannerWidget.dart';
 import '../../widgets/widget_notification/Notification_Toast.dart';
 

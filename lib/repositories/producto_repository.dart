@@ -9,7 +9,6 @@ class ProductoRepository {
 
 
 
-  // Obtener producto por código de barras
   Future<Producto?> getProductoPorCodigoBarras(String codigoBarras) async {
     try {
       final response = await _supabase
