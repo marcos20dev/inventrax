@@ -33,6 +33,8 @@ class _ProveedorFormScreenState extends State<ProveedorFormScreen> {
   @override
   void initState() {
     super.initState();
+    print("Proveedor recibido para ${widget.proveedor == null ? 'crear' : 'editar'}: ${widget.proveedor?.toString()}");
+
     _nombreProveedorController = TextEditingController(
       text: widget.proveedor != null ? widget.proveedor!['nombre'] ?? '' : '',
     );
@@ -97,27 +99,24 @@ class _ProveedorFormScreenState extends State<ProveedorFormScreen> {
 
     // Crear modelo con datos del formulario
     final proveedor = Proveedor(
-      idProveedor: widget.proveedor?['id_proveedor'], // Si es null, se crea uno nuevo
+      idProveedor: widget.proveedor?['id_proveedor'] ?? widget.proveedor?['id'],
       nombreProveedor: _nombreProveedorController.text.trim(),
       telefono: _telefonoController.text.trim(),
       correo: _correoController.text.trim(),
       direccion: _direccionController.text.trim(),
     );
 
-    final success = await context.read<ProveedorViewModel>().saveProveedor(proveedor);
-
+    // Verificar si el idProveedor está correctamente asignado
+    print("Botón presionado. ID proveedor: ${proveedor.idProveedor}");
 
     try {
-      // Guardar usando ViewModel
       final success = await context.read<ProveedorViewModel>().saveProveedor(proveedor);
 
       if (!mounted) return;
 
-      // Ocultar loading
       setState(() => _isSubmitting = false);
 
       if (success) {
-        // Mostrar mensaje éxito
         showNotificationToast(
           context,
           message: widget.proveedor == null
@@ -135,11 +134,9 @@ class _ProveedorFormScreenState extends State<ProveedorFormScreen> {
           _proveedorSeleccionado = null;
           _formKey.currentState?.reset();
         } else {
-          // Volver atrás en edición
           Navigator.of(context).pop(true);
         }
       } else {
-        // Mostrar error
         final errorMsg = context.read<ProveedorViewModel>().errorMessage;
         showNotificationToast(
           context,
@@ -152,7 +149,6 @@ class _ProveedorFormScreenState extends State<ProveedorFormScreen> {
 
       setState(() => _isSubmitting = false);
 
-      // Mostrar error excepción
       showNotificationToast(
         context,
         message: e.toString(),

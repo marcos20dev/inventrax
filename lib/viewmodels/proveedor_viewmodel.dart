@@ -54,18 +54,34 @@ class ProveedorViewModel with ChangeNotifier {
     }
   }
 
+
+
+
   Future<bool> saveProveedor(Proveedor proveedor) async {
     _setLoading(true);
     try {
       final proveedorMap = proveedor.toMap();
 
+      // Verificar si estamos creando o actualizando
       if (proveedor.idProveedor == null) {
-        // Crear nuevo proveedor
-        await _repository.createProveedor(proveedorMap);
+        print("Creando un nuevo proveedor...");
+        // Aquí verificamos si el proveedor ya existe cuando estamos creando
+        final createdId = await _repository.createProveedor(proveedorMap);
+        if (createdId is int) {
+          return true;
+        } else {
+          _setError('El proveedor ya existe');
+          return false;
+        }
       } else {
-        // Actualizar proveedor existente
-        await _repository.updateProveedor(proveedor.idProveedor!, proveedorMap);
+        print("Actualizando proveedor con ID: ${proveedor.idProveedor}");
+        final updated = await _repository.updateProveedor(proveedor.idProveedor!, proveedorMap);
+        if (!updated) {
+          _setError('No se pudo actualizar el proveedor');
+          return false;
+        }
       }
+
       return true;
     } catch (e) {
       _setError('Error al guardar el proveedor: ${e.toString()}');
@@ -74,6 +90,11 @@ class ProveedorViewModel with ChangeNotifier {
       _setLoading(false);
     }
   }
+
+
+
+
+
 
 
 

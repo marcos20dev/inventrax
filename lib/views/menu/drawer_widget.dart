@@ -39,7 +39,6 @@ class MenuDrawer extends StatelessWidget {
       ),
       child: CustomScrollView(
         slivers: [
-          /// Encabezado premium
           SliverToBoxAdapter(
             child: Container(
               height: 160,
@@ -157,11 +156,11 @@ class MenuDrawer extends StatelessWidget {
                   title: 'Inventario',
                   color: primaryColor,
                   children: [
-                    MenuItemWidget(
-                      icon: Icons.compare_arrows,
-                      title: 'Movimientos',
-                      color: primaryColor,
-                    ),
+                    //MenuItemWidget(
+    //icon: Icons.compare_arrows,
+    //title: 'Movimientos',
+    // color: primaryColor,
+                    //),
                     MenuItemWidget(
                       icon: Icons.input,
                       title: 'Entradas',
@@ -172,11 +171,11 @@ class MenuDrawer extends StatelessWidget {
                       title: 'Salidas',
                       color: primaryColor,
                     ),
-                    MenuItemWidget(
-                      icon: Icons.assessment,
-                      title: 'Stock Actual',
-                      color: primaryColor,
-                    ),
+              //MenuItemWidget(
+              // icon: Icons.assessment,
+              // title: 'Stock Actual',
+              // color: primaryColor,
+                    // ),
                   ],
                 ),
 
@@ -187,7 +186,7 @@ class MenuDrawer extends StatelessWidget {
                   children: [
                     MenuItemWidget(
                       icon: Icons.grid_view,
-                      title: 'Catálogo',
+                      title: 'Productos',
                       color: primaryColor,
                       onTap: () {
                         Navigator.pop(context); // Cierra el drawer
@@ -213,18 +212,18 @@ class MenuDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    MenuItemWidget(
-                      icon: Icons.label,
-                      title: 'Marcas',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => TestDashboard()),
-                        );
-                      },
-                    ),
+              // MenuItemWidget(
+              // icon: Icons.label,
+              //     title: 'Marcas',
+              //   color: primaryColor,
+    //   onTap: () {
+    //     Navigator.pop(context); // Cierra el drawer
+    //     Navigator.push(
+    //       context,
+    //      MaterialPageRoute(builder: (_) => TestDashboard()),
+    //    );
+              //  },
+                    //  ),
                   ],
                 ),
 
@@ -251,11 +250,11 @@ class MenuDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    MenuItemWidget(
-                      icon: Icons.shopping_cart,
-                      title: 'Órdenes de Compra',
-                      color: primaryColor,
-                    ),
+              //  MenuItemWidget(
+              //   icon: Icons.shopping_cart,
+              //    title: 'Órdenes de Compra',
+              //    color: primaryColor,
+                    //  ),
                   ],
                 ),
 

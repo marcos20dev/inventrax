@@ -34,29 +34,67 @@ class ProveedorRepository {
     return response;
   }
 
-  Future<int> createProveedor(Map<String, dynamic> proveedor) async {
-    final response = await _supabase
-        .from('proveedores')
-        .insert(proveedor)
-        .select('id_proveedor')
-        .single();
+  Future<Object> createProveedor(Map<String, dynamic> proveedor) async {
+    try {
+      print("createProveedor ejecutado");
 
-    return response['id_proveedor'] as int;
+      // Verificamos si el proveedor ya existe (si no tiene id_proveedor)
+      final existingProveedor = await _supabase
+          .from('proveedores')
+          .select()
+          .eq('nombre_proveedor', proveedor['nombre_proveedor'])
+          .maybeSingle(); // Devuelve null si no existe
+
+      if (existingProveedor != null) {
+        print("Proveedor ya existe.");
+        return false;  // No creamos el proveedor porque ya existe
+      }
+
+      // Insertamos el nuevo proveedor
+      final response = await _supabase
+          .from('proveedores')
+          .insert(proveedor)
+          .select('id_proveedor')
+          .single();
+
+      print("Proveedor creado con ID: ${response['id_proveedor']}");
+      return response['id_proveedor'] as int;
+    } catch (e) {
+      print("Error al crear proveedor: $e");
+      return false;  // Error al crear
+    }
   }
 
   Future<bool> updateProveedor(int id, Map<String, dynamic> proveedor) async {
     try {
+      print("Actualizando proveedor con ID: $id");
+
+      // Actualizamos el proveedor si ya existe
       final response = await _supabase
           .from('proveedores')
           .update(proveedor)
-          .eq('id_proveedor', id);
+          .eq('id_proveedor', id)
+          .select();
 
-      // Puedes verificar que 'response' no esté vacío para confirmar que actualizó algo:
-      return response != null && (response as List).isNotEmpty;
+      if (response != null && response.isNotEmpty) {
+        print("Proveedor actualizado con éxito.");
+        return true;
+      } else {
+        print("No se pudo actualizar el proveedor.");
+        return false;
+      }
     } catch (e) {
+      print("Error al actualizar proveedor: $e");
       return false;
     }
   }
+
+
+
+
+
+
+
 
 
   Future<bool> deleteProveedor(int id) async {

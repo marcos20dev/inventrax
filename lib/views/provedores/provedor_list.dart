@@ -83,6 +83,9 @@ class _ProveedorListScreenState extends State<ProveedorListScreen> {
     }
   }
 
+
+
+
   void _deleteProveedor(int id) async {
     final viewModel = context.read<ProveedorViewModel>();
 

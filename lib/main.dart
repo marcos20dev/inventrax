@@ -7,6 +7,7 @@ import 'package:inventrax/viewmodels/categoria_viewmodel.dart';
 import 'package:inventrax/viewmodels/cliente_viewmodel.dart';
 import 'package:inventrax/viewmodels/producto_viewmodel.dart';
 import 'package:inventrax/viewmodels/venta/registro_venta_viewmodel.dart';
+import 'package:inventrax/views/indications/onboarding_screen.dart';
 import 'package:inventrax/views/menu/menu_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -98,8 +99,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Inventrax',
-      home: MenuScreen(uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9'),
-      // OnboardingScreen(),
+      home:      MenuScreen(uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9'),
+
+      //OnboardingScreen(),
+      //MenuScreen(uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9'),
+      //
     );
   }
 }

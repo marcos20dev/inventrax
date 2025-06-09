@@ -200,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             SizedBox(height: 16),
                             AuthTextField(
                               controller: _telefonoController,
-                              labelText: 'Teléfono móvil',
+                              labelText: 'Celular',
                               borderColor: accentColor,
                               prefixIcon: Icon(Icons.phone, color: Color(0xFF26A69A)),
                               keyboardType: TextInputType.phone,
