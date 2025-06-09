@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../widgets/widget_producto/DropdownField.dart';
 import '../../../widgets/widget_producto/ProductoTextField.dart';
 import '../../../widgets/widget_texfield/textfield_widget.dart';
@@ -89,7 +88,7 @@ class ProductoInfoSection extends StatelessWidget {
           surfaceColor: Colors.white,
           onSurfaceColor: Colors.black87,
           labelText: 'Código de Barras',
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.text, // Cambio aquí a TextInputType.text
           prefixIcon: Container(
             padding: EdgeInsets.all(5),
             child: Image.asset('assets/code1.png', width: 24, height: 24),
@@ -98,8 +97,17 @@ class ProductoInfoSection extends StatelessWidget {
             icon: Image.asset('assets/icon_barras1.png', width: 24, height: 24),
             onPressed: onBarcodeScan,
           ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Por favor ingresa el código de barras';
+            }
+            // Si deseas realizar alguna validación adicional, como longitud mínima o máxima
+            if (value.length < 8) {
+              return 'El código de barras debe tener al menos 8 caracteres';
+            }
+            return null; // No hay error
+          },
         ),
-
 
         SizedBox(height: fieldSpacing),
 

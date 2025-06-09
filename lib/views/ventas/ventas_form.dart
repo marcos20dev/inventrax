@@ -456,7 +456,6 @@ class VentasFormScreen extends StatelessWidget {
                                         Expanded(
                                           child: TextFieldWidget(
                                             controller: ventasVM.cantidadController,
-                                            focusNode: ventasVM.cantidadFocusNode,
 
                                             isDark: isDark,
                                             primaryColor: _primaryColor,

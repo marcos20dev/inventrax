@@ -24,7 +24,7 @@ class TextFieldWidget extends StatefulWidget {
   final void Function(String)? onSuggestionSelected;
 
   // Nuevas propiedades para control de foco y acciones teclado
-  final FocusNode? focusNode;
+
   final TextInputAction? textInputAction;
   final void Function(String)? onFieldSubmitted;
 
@@ -57,7 +57,6 @@ class TextFieldWidget extends StatefulWidget {
     this.customErrorMessage,
     this.suggestions,
     this.onSuggestionSelected,
-    this.focusNode,
     this.textInputAction,
     this.onFieldSubmitted,
     this.onChanged,
@@ -171,7 +170,6 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
             // Aquí se agrega onChanged
             onChanged: widget.onChanged,
 
-            focusNode: widget.focusNode,
             textInputAction: widget.textInputAction,
             onFieldSubmitted: widget.onFieldSubmitted,
 

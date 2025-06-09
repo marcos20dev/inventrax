@@ -110,7 +110,7 @@ class ProductoListItem extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Precio Venta: \$${producto['precio_venta']?.toStringAsFixed(2) ?? '0.00'}',
+                          'Precio Venta: S/${producto['precio_venta']?.toStringAsFixed(2) ?? '0.00'}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],

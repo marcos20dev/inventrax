@@ -40,7 +40,10 @@ class _ClientesFormScreenState extends State<ClientesFormScreen> {
 
   void _inicializarControladores() {
     final c = widget.cliente;
-    tipoCliente = c?.tipoCliente;
+
+    // Establecer el tipo de cliente predeterminado si no existe
+    tipoCliente = c?.tipoCliente ?? 'persona';  // 'persona' es el valor por defecto
+
     nombreController = TextEditingController(text: c?.nombre ?? '');
     apellidoController = TextEditingController(text: c?.apellido ?? '');
     razonSocialController = TextEditingController(text: c?.razonSocial ?? '');
@@ -49,6 +52,8 @@ class _ClientesFormScreenState extends State<ClientesFormScreen> {
     correoController = TextEditingController(text: c?.correo ?? '');
     direccionController = TextEditingController(text: c?.direccion ?? '');
   }
+
+
 
   void _limpiarFormulario() {
     setState(() {

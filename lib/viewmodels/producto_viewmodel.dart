@@ -103,11 +103,21 @@ class ProductoViewModel extends ChangeNotifier {
   }
 
 
+// Agrega estas variables al ViewModel
+  bool _fromApi = false;
+  bool get fromApi => _fromApi;
+
+// Modifica el método fetchProductInfo
+  // En tu ProductoViewModel, modifica el método fetchProductInfo
   Future<void> fetchProductInfo(String barcode) async {
     isLoading = true;
+    _fromApi = true;
     notifyListeners();
 
     try {
+      // Primero establece el código de barras escaneado
+      codigoBarras = barcode;
+
       final url = Uri.parse('https://api.upcitemdb.com/prod/trial/lookup?upc=$barcode');
       final response = await http.get(url);
 
@@ -116,24 +126,16 @@ class ProductoViewModel extends ChangeNotifier {
 
         if (data['code'] == 'OK' && data['total'] > 0) {
           final item = data['items'][0];
-          codigoBarras = barcode;
           nombre = item['title'] ?? '';
           descripcion = item['description'] ?? '';
           productoEncontrado = true;
         } else {
-          codigoBarras = barcode;
           nombre = '';
           descripcion = '';
           productoEncontrado = false;
         }
-
-      } else {
-        codigoBarras = barcode;
-        nombre = '';
-        descripcion = '';
       }
     } catch (e) {
-      codigoBarras = barcode;
       nombre = '';
       descripcion = '';
     } finally {
@@ -141,6 +143,23 @@ class ProductoViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+
+
+
+// Modifica el reset
+  void reset() {
+    codigoBarras = '';
+    nombre = '';
+    descripcion = '';
+    unidadMedida = 'unidad';
+    productoEncontrado = false;
+    errorMessage = null;
+    _fromApi = false;
+    notifyListeners();
+  }
+
+
 
   Future<bool> saveProduct({
     required Map<String, dynamic> producto,
@@ -193,13 +212,5 @@ class ProductoViewModel extends ChangeNotifier {
       return false;
     }
   }
-  void reset() {
-    codigoBarras = '';
-    nombre = '';
-    descripcion = '';
-    unidadMedida = 'unidad';
-    productoEncontrado = false;
-    errorMessage = null;
-    notifyListeners();
-  }
+
 }

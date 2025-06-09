@@ -8,7 +8,6 @@ import '../../repositories/producto_repository.dart';
 import '../../services/ChangeNotifier.dart';
 import '../../viewmodels/categoria_viewmodel.dart';
 import '../../viewmodels/producto_viewmodel.dart';
-
 import '../../viewmodels/proveedor_viewmodel.dart';
 import '../../widgets/widget_drawer/base_scaffold.dart';
 import '../../widgets/widget_producto/DropdownField.dart';
@@ -17,7 +16,6 @@ import '../../widgets/widget_producto/ScannerWidget.dart';
 import '../../widgets/widget_notification/Notification_Toast.dart';
 
 class ProductosFormScreen extends StatefulWidget {
-
   const ProductosFormScreen({Key? key}) : super(key: key);
 
   @override
@@ -45,13 +43,35 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeControllers();
+    // Inicializa los controladores con valores vacíos
+    _codigoBarrasController = TextEditingController();
+    _nombreController = TextEditingController();
+    _descripcionController = TextEditingController();
+    _cantidadController = TextEditingController();
+    _precioCompraController = TextEditingController();
+    _precioVentaController = TextEditingController();
+    _categoriaController = TextEditingController();
+    _proveedorController = TextEditingController();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCategorias();
       _loadProveedores();
     });
   }
 
+  @override
+  void dispose() {
+    // Asegúrate de limpiar los controladores cuando ya no se necesiten
+    _codigoBarrasController.dispose();
+    _nombreController.dispose();
+    _descripcionController.dispose();
+    _cantidadController.dispose();
+    _precioCompraController.dispose();
+    _precioVentaController.dispose();
+    _categoriaController.dispose();
+    _proveedorController.dispose();
+    super.dispose();
+  }
 
   void _submitForm(ProductoViewModel viewModel) {
     if (!_formKey.currentState!.validate()) {
@@ -77,7 +97,6 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
       'precio_venta': double.tryParse(_precioVentaController.text.trim()) ?? 0.0,
       'unidad_medida': _selectedUnidadMedida,
       'id_categoria': int.tryParse(_categoriaController.text.trim()) ?? 0,
-      // No va precio_compra aquí porque no está en productos
     };
 
     final entradaData = <String, dynamic>{
@@ -85,17 +104,15 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
       'cantidad': int.tryParse(_cantidadController.text.trim()) ?? 0,
       'fecha_entrada': DateTime.now().toIso8601String(),
       'precio_compra': (double.tryParse(_precioCompraController.text.trim()) ?? 0.0).toInt(),
-      // 'id_producto' lo pondrá el ViewModel después de crear el producto
     };
 
     final movimientoData = <String, dynamic>{
-      'id_usuario': userUid, // aquí debes poner el id del usuario que hace la acción
+      'id_usuario': userUid,
       'tipo_movimiento': 'entrada',
       'cantidad': int.tryParse(_cantidadController.text.trim()) ?? 0,
       'fecha_movimiento': DateTime.now().toIso8601String(),
-      'motivo': 'Stock inicial', // o según el motivo seleccionado
-      'destinatario': 'Almacén Central', // o según el destinatario
-      // 'id_producto' lo pondrá el ViewModel después de crear el producto
+      'motivo': 'Stock inicial',
+      'destinatario': 'Almacén Central',
     };
 
     viewModel.saveProduct(
@@ -107,24 +124,10 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
         _mostrarNotificacion(true);
         _resetForm();
         viewModel.reset();  // <-- Limpia valores en ViewModel también
-
       } else {
         _mostrarNotificacion(false);
       }
     });
-  }
-
-
-
-  void _initializeControllers() {
-    _codigoBarrasController = TextEditingController();
-    _nombreController = TextEditingController();
-    _descripcionController = TextEditingController();
-    _cantidadController = TextEditingController();
-    _precioCompraController = TextEditingController();
-    _precioVentaController = TextEditingController();
-    _categoriaController = TextEditingController();
-    _proveedorController = TextEditingController(); // Inicializa controlador proveedor
   }
 
   void _loadCategorias() async {
@@ -137,38 +140,6 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
     await proveedorVM.loadProveedores();
   }
 
-  @override
-  void dispose() {
-    _codigoBarrasController.dispose();
-    _nombreController.dispose();
-    _descripcionController.dispose();
-    _cantidadController.dispose();
-    _precioCompraController.dispose();
-    _precioVentaController.dispose();
-    _categoriaController.dispose();
-    _proveedorController.dispose(); // Dispose proveedorController
-    super.dispose();
-  }
-
-  void _mostrarNotificacion(bool exito) {
-    final mensaje = exito ? 'Producto guardado correctamente' : 'Error al guardar el producto';
-    final tipo = exito ? NotificationType.success : NotificationType.error;
-    showNotificationToast(context, message: mensaje, type: tipo);
-  }
-
-  Future<void> _handleBarcodeScan(ProductoViewModel viewModel) async {
-    final scannedCode = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(builder: (_) => ScannerWidget(viewModel: viewModel)),
-    );
-
-    if (scannedCode != null) {
-      await viewModel.fetchProductInfo(scannedCode);
-      setState(() => _busquedaRealizada = true);
-    }
-  }
-
-
   void _resetForm() {
     _formKey.currentState?.reset();
     _codigoBarrasController.clear();
@@ -180,6 +151,56 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
     _categoriaController.clear();
     _proveedorController.clear();
     setState(() => _selectedUnidadMedida = 'unidad');
+  }
+
+  void _mostrarNotificacion(bool exito) {
+    final mensaje = exito ? 'Producto guardado correctamente' : 'Error al guardar el producto';
+    final tipo = exito ? NotificationType.success : NotificationType.error;
+    showNotificationToast(context, message: mensaje, type: tipo);
+  }
+
+  // Elimina el método _syncControllerWithViewModel
+
+  Future<void> _handleBarcodeScan(ProductoViewModel viewModel) async {
+    // Realizamos la navegación al escáner y esperamos que nos devuelvan el código escaneado
+    final scannedCode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => ScannerWidget(viewModel: viewModel)),
+    );
+
+    if (scannedCode != null) {
+      print('Código escaneado: $scannedCode'); // Verificar que el código de barras fue escaneado
+
+      // Llamamos al método para obtener los detalles del producto desde la API
+      await viewModel.fetchProductInfo(scannedCode);
+
+      // Verificamos si la respuesta provino de la API y si los datos están completos
+      if (viewModel.fromApi) {
+        print('Producto encontrado en la API:');
+        print('Código de barras: ${viewModel.codigoBarras}');
+        print('Nombre: ${viewModel.nombre}');
+        print('Descripción: ${viewModel.descripcion}');
+
+        // Actualizamos los controladores con los datos obtenidos
+        setState(() {
+          _codigoBarrasController.text = viewModel.codigoBarras;  // Asignar el código de barras
+          _nombreController.text = viewModel.nombre;  // Asignar nombre del producto
+          _descripcionController.text = viewModel.descripcion;  // Asignar descripción
+        });
+
+        print('Campos actualizados:');
+        print('Código de barras: ${_codigoBarrasController.text}');
+        print('Nombre: ${_nombreController.text}');
+        print('Descripción: ${_descripcionController.text}');
+      } else {
+        print('Producto no encontrado en la API.');
+      }
+
+      // Marcar que la búsqueda fue realizada
+      setState(() => _busquedaRealizada = true);
+    } else {
+      print('No se escaneó ningún código.');
+    }
   }
 
   @override
@@ -211,103 +232,75 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
 
     return ChangeNotifierProvider(
       create: (_) => ProductoViewModel(repository: ProductoRepository()),
-      child: Consumer<ProductoViewModel>(
-        builder: (context, viewModel, _) {
-          _syncControllerWithViewModel(viewModel);
-
-          return BaseScaffold(
-            title: 'Nuevo Producto',
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(10),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ProductoInfoSection(
-                      categoriaController: _categoriaController,
-                      categoriaItems: categoriaItems,
-                      onCategoriaChanged: (val) {
-                        if (val != null) setState(() => _categoriaController.text = val);
-                      },
-                      codigoBarrasController: _codigoBarrasController,
-                      onBarcodeScan: () => _handleBarcodeScan(viewModel),
-                      nombreController: _nombreController,
-                      descripcionController: _descripcionController,
-                      cantidadController: _cantidadController,
-                      precioVentaController: _precioVentaController,
-                      unidadMedida: _selectedUnidadMedida,
-                      primaryColor: primaryColor,
-                      surfaceColor: surfaceColor,
-                      onSurfaceColor: onSurfaceColor,
-                      fieldSpacing: 20,
-                      isSmallScreen: MediaQuery.of(context).size.width < 600,
-                      validateCategoria: (val) => val == null || val.isEmpty ? 'Seleccione una categoría' : null,
-                      validateCantidad: (val) => val == null || val.isEmpty ? 'Ingrese cantidad' : null,
-                      validatePrecio: (val) {
-                        if (val == null || val.isEmpty) return 'Ingrese precio';
-                        if (double.tryParse(val) == null) return 'Ingrese un número válido';
-                        if (_precioCompraController.text.isNotEmpty &&
-                            double.parse(val) < double.parse(_precioCompraController.text)) {
-                          return 'El precio de venta debe ser mayor al de compra';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    SizedBox(height: 30),
-
-                    DetalleEntradaSection(
-                      precioCompraController: _precioCompraController,
-                      proveedorController: _proveedorController,
-                      proveedorItems: proveedorItems,
-                      onProveedorChanged: (val) {
-                        setState(() => _proveedorController.text = val ?? '');
-                      },
-                      primaryColor: primaryColor,
-                      surfaceColor: surfaceColor,
-                      onSurfaceColor: onSurfaceColor,
-                      fieldSpacing: 20,
-                    ),
-
-                    SizedBox(height: 30),
-
-                    MovimientoInventarioSection(
-                      fieldSpacing: 20,
-                      primaryColor: primaryColor,
-                      surfaceColor: surfaceColor,
-                      onSurfaceColor: onSurfaceColor,
-                      onMotivoChanged: (val) {
-                        print("Motivo seleccionado: $val");
-                        // aquí puedes guardar el valor en un provider o en una variable
-                      },
-                    ),
-
-
-                    SizedBox(height: 30),
-
-                    _buildSaveButton(viewModel, primaryColor),
-                    if (viewModel.isLoading) const SizedBox(height: 20),
-                  ],
-                ),
+      child: Consumer<ProductoViewModel>(builder: (context, viewModel, _) {
+        return BaseScaffold(
+          title: 'Nuevo Producto',
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(10),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ProductoInfoSection(
+                    categoriaController: _categoriaController,
+                    categoriaItems: categoriaItems,
+                    onCategoriaChanged: (val) {
+                      if (val != null) setState(() => _categoriaController.text = val);
+                    },
+                    codigoBarrasController: _codigoBarrasController,
+                    onBarcodeScan: () => _handleBarcodeScan(viewModel),
+                    nombreController: _nombreController,
+                    descripcionController: _descripcionController,
+                    cantidadController: _cantidadController,
+                    precioVentaController: _precioVentaController,
+                    unidadMedida: _selectedUnidadMedida,
+                    primaryColor: primaryColor,
+                    surfaceColor: surfaceColor,
+                    onSurfaceColor: onSurfaceColor,
+                    fieldSpacing: 20,
+                    isSmallScreen: MediaQuery.of(context).size.width < 600,
+                    validateCategoria: (val) => val == null || val.isEmpty ? 'Seleccione una categoría' : null,
+                    validateCantidad: (val) => val == null || val.isEmpty ? 'Ingrese cantidad' : null,
+                    validatePrecio: (val) {
+                      if (val == null || val.isEmpty) return 'Ingrese precio';
+                      if (double.tryParse(val) == null) return 'Ingrese un número válido';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 30),
+                  DetalleEntradaSection(
+                    precioCompraController: _precioCompraController,
+                    proveedorController: _proveedorController,
+                    proveedorItems: proveedorItems,
+                    onProveedorChanged: (val) {
+                      setState(() => _proveedorController.text = val ?? '');
+                    },
+                    primaryColor: primaryColor,
+                    surfaceColor: surfaceColor,
+                    onSurfaceColor: onSurfaceColor,
+                    fieldSpacing: 20,
+                  ),
+                  SizedBox(height: 30),
+                  MovimientoInventarioSection(
+                    fieldSpacing: 20,
+                    primaryColor: primaryColor,
+                    surfaceColor: surfaceColor,
+                    onSurfaceColor: onSurfaceColor,
+                    onMotivoChanged: (val) {
+                      print("Motivo seleccionado: $val");
+                    },
+                  ),
+                  SizedBox(height: 30),
+                  _buildSaveButton(viewModel, primaryColor),
+                  if (viewModel.isLoading) const SizedBox(height: 20),
+                ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
-  }
-
-  void _syncControllerWithViewModel(ProductoViewModel viewModel) {
-    if (_codigoBarrasController.text != viewModel.codigoBarras) {
-      _codigoBarrasController.text = viewModel.codigoBarras;
-    }
-    if (_nombreController.text != viewModel.nombre) {
-      _nombreController.text = viewModel.nombre;
-    }
-    if (_descripcionController.text != viewModel.descripcion) {
-      _descripcionController.text = viewModel.descripcion;
-    }
   }
 
   Widget _buildSaveButton(ProductoViewModel viewModel, Color primaryColor) {
