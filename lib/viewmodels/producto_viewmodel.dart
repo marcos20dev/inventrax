@@ -107,43 +107,49 @@ class ProductoViewModel extends ChangeNotifier {
   bool _fromApi = false;
   bool get fromApi => _fromApi;
 
-// Modifica el método fetchProductInfo
-  // En tu ProductoViewModel, modifica el método fetchProductInfo
+
+
   Future<void> fetchProductInfo(String barcode) async {
+    // Resetear todos los valores antes de buscar
+    nombre = '';
+    descripcion = '';
+    productoEncontrado = false;
+    _fromApi = false;
+
     isLoading = true;
-    _fromApi = true;
     notifyListeners();
 
     try {
-      // Primero establece el código de barras escaneado
-      codigoBarras = barcode;
+      // Primero intenta buscar en la base de datos local
+      final localProduct = await repository.getProductoPorCodigoBarras(barcode);
 
-      final url = Uri.parse('https://api.upcitemdb.com/prod/trial/lookup?upc=$barcode');
-      final response = await http.get(url);
+      if (localProduct != null) {
+        nombre = localProduct.nombreProducto;
+        descripcion = localProduct.descripcion ?? '';
+        productoEncontrado = true;
+      } else {
+        // Si no está localmente, busca en la API
+        final url = Uri.parse('https://api.upcitemdb.com/prod/trial/lookup?upc=$barcode');
+        final response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        if (data['code'] == 'OK' && data['total'] > 0) {
-          final item = data['items'][0];
-          nombre = item['title'] ?? '';
-          descripcion = item['description'] ?? '';
-          productoEncontrado = true;
-        } else {
-          nombre = '';
-          descripcion = '';
-          productoEncontrado = false;
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['code'] == 'OK' && data['total'] > 0) {
+            final item = data['items'][0];
+            nombre = item['title'] ?? '';
+            descripcion = item['description'] ?? '';
+            _fromApi = true;
+            productoEncontrado = true;
+          }
         }
       }
     } catch (e) {
-      nombre = '';
-      descripcion = '';
+      print('Error en fetchProductInfo: $e');
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
-
 
 
 

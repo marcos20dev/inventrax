@@ -83,10 +83,22 @@ class _ScannerWidgetState extends State<ScannerWidget> {
               controller: cameraController,
               onDetect: (capture) async {
                 final barcodes = capture.barcodes;
+                // En el método onDetect del MobileScanner
                 if (barcodes.isNotEmpty) {
                   final code = barcodes.first.rawValue;
                   if (code != null) {
-                    _onScanningChanged(false);
+                    // Primero detenemos el escaneo
+                    setState(() => isScanning = false);
+
+                    // Esperamos un breve momento para que la UI se actualice
+                    await Future.delayed(const Duration(milliseconds: 300));
+
+                    // Cerramos el escáner y devolvemos el código
+                    if (mounted) {
+                      Navigator.of(context).pop(code);
+                    }
+
+                    // Opcional: procesar la información del producto
                     await widget.viewModel.fetchProductInfo(code);
                   }
                 }

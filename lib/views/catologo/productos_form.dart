@@ -162,44 +162,44 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
   // Elimina el método _syncControllerWithViewModel
 
   Future<void> _handleBarcodeScan(ProductoViewModel viewModel) async {
-    // Realizamos la navegación al escáner y esperamos que nos devuelvan el código escaneado
-    final scannedCode = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(builder: (_) => ScannerWidget(viewModel: viewModel)),
-    );
+    try {
+      final scannedCode = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(builder: (_) => ScannerWidget(viewModel: viewModel)),
+      );
 
-    if (scannedCode != null) {
-      print('Código escaneado: $scannedCode'); // Verificar que el código de barras fue escaneado
-
-      // Llamamos al método para obtener los detalles del producto desde la API
-      await viewModel.fetchProductInfo(scannedCode);
-
-      // Verificamos si la respuesta provino de la API y si los datos están completos
-      if (viewModel.fromApi) {
-        print('Producto encontrado en la API:');
-        print('Código de barras: ${viewModel.codigoBarras}');
-        print('Nombre: ${viewModel.nombre}');
-        print('Descripción: ${viewModel.descripcion}');
-
-        // Actualizamos los controladores con los datos obtenidos
+      if (scannedCode != null && scannedCode.isNotEmpty) {
+        // Limpiar los campos ANTES de asignar el nuevo código
         setState(() {
-          _codigoBarrasController.text = viewModel.codigoBarras;  // Asignar el código de barras
-          _nombreController.text = viewModel.nombre;  // Asignar nombre del producto
-          _descripcionController.text = viewModel.descripcion;  // Asignar descripción
+          _nombreController.clear();
+          _descripcionController.clear();
+          _codigoBarrasController.text = scannedCode;
+          _busquedaRealizada = false;
         });
 
-        print('Campos actualizados:');
-        print('Código de barras: ${_codigoBarrasController.text}');
-        print('Nombre: ${_nombreController.text}');
-        print('Descripción: ${_descripcionController.text}');
-      } else {
-        print('Producto no encontrado en la API.');
-      }
+        // Buscar información del nuevo código
+        await viewModel.fetchProductInfo(scannedCode);
 
-      // Marcar que la búsqueda fue realizada
-      setState(() => _busquedaRealizada = true);
-    } else {
-      print('No se escaneó ningún código.');
+        // Actualizar UI si se encontró información
+        if (viewModel.productoEncontrado) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _nombreController.text = viewModel.nombre;
+                _descripcionController.text = viewModel.descripcion;
+                _busquedaRealizada = true;
+              });
+            }
+          });
+        }
+      }
+    } catch (e) {
+      print('Error en escaneo: $e');
+      if (mounted) {
+        showNotificationToast(context,
+            message: 'Error al escanear código',
+            type: NotificationType.error);
+      }
     }
   }
 
