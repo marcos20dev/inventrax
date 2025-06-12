@@ -10,8 +10,10 @@ import '../categorias/categorias_form.dart';
 import '../categorias/categorias_list.dart';
 import '../catologo/productos_form.dart';
 import '../catologo/productos_list.dart';
+import '../entradas_producto/entradas_form.dart';
 import '../provedores/provedor_form.dart';
 import '../provedores/provedor_list.dart';
+import '../salida_producto/salida_list.dart';
 import '../ventas/ventas_form.dart';
 import '../ventas/ventas_list.dart';
 
@@ -165,17 +167,27 @@ class MenuDrawer extends StatelessWidget {
                       icon: Icons.input,
                       title: 'Entradas',
                       color: primaryColor,
+                      onTap: () {
+                        Navigator.pop(context); // Cierra el drawer
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => InventarioScreen()),
+                        );
+                      },
                     ),
                     MenuItemWidget(
                       icon: Icons.output,
                       title: 'Salidas',
                       color: primaryColor,
+                      onTap: () {
+                        Navigator.pop(context); // Cierra el drawer
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => VentasScreen()),
+                        );
+                      },
                     ),
-              //MenuItemWidget(
-              // icon: Icons.assessment,
-              // title: 'Stock Actual',
-              // color: primaryColor,
-                    // ),
+
                   ],
                 ),
 

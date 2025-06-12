@@ -1,13 +1,14 @@
 class Producto {
-  final int? idProducto; // Se genera automáticamente en la BD
+  final int? idProducto;
   final String nombreProducto;
   final String descripcion;
-  final int cantidadDisponible;
+  final int cantidadDisponible; // Esta es la que representa el stock actual
   final String unidadMedida;
   final double precioVenta;
   final int idCategoria;
   final String codigoBarras;
-  final DateTime? createdAt; // Se genera automáticamente en la BD
+  final DateTime? createdAt;
+  String? categoria; // Nueva propiedad para el nombre de la categoría
 
   Producto({
     this.idProducto,
@@ -19,6 +20,7 @@ class Producto {
     required this.idCategoria,
     required this.codigoBarras,
     this.createdAt,
+    this.categoria, // Agregar al constructor
   });
 
   factory Producto.fromJson(Map<String, dynamic> json) {
@@ -34,12 +36,14 @@ class Producto {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
+      categoria: json['categorias'] != null
+          ? json['categorias']['nombre_categoria'] as String?
+          : null,  // Asigna el nombre de la categoría
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      // id_producto y created_at no se envían al crear registro porque son automáticos
       'nombre_producto': nombreProducto,
       'descripcion': descripcion,
       'cantidad_disponible': cantidadDisponible,

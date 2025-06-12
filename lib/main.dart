@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:inventrax/repositories/categoria_repository.dart';
 import 'package:inventrax/repositories/cliente_repository.dart';
+import 'package:inventrax/repositories/dashboard_repository.dart';
 import 'package:inventrax/repositories/producto_repository.dart';
 import 'package:inventrax/services/ChangeNotifier.dart';
 import 'package:inventrax/viewmodels/categoria_viewmodel.dart';
 import 'package:inventrax/viewmodels/cliente_viewmodel.dart';
+import 'package:inventrax/viewmodels/dashboard_viewmodel.dart';
 import 'package:inventrax/viewmodels/producto_viewmodel.dart';
 import 'package:inventrax/viewmodels/venta/registro_venta_viewmodel.dart';
 import 'package:inventrax/views/indications/onboarding_screen.dart';
@@ -84,6 +86,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider<RegistroVentaViewModel>(
           create: (context) => RegistroVentaViewModel(context.read<VentaRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DashboardViewModel(DashboardRepository(Supabase.instance.client)),
         ),
       ],
       child: const MyApp(),

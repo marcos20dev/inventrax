@@ -20,9 +20,135 @@ class ProductoViewModel extends ChangeNotifier {
 
   // Para manejo de errores
   String? errorMessage;
+  int? idProducto;
 
   double precioVenta = 0.0;
   String get nombreProducto => nombre;
+  String getProductId() {
+    return idProducto != null ? 'Producto ID: $idProducto' : 'ID no disponible';
+  }
+
+  int cantidadDisponible = 0;
+  String categoria = '';
+  int idCategoria = 0;
+  List<Map<String, dynamic>> categorias = [];  // Mantener el tipo adecuado para categorías
+  String? categoriaSeleccionada;  // Guardar el valor seleccionado de la categoría
+
+  List<Producto> productos = [];  // Cambié el tipo a List<Producto>
+
+  Future<void> allProductosV2() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      // Llamada a la función RPC en Supabase para obtener todos los productos
+      final response = await repository.getAllProducts();
+      if (response != null && response.isNotEmpty) {
+        // Asignamos los productos a la lista
+        productos = response;
+        isLoading = false;
+        notifyListeners();
+      } else {
+        // Si no hay productos, puedes manejarlo con un mensaje o lógica alternativa
+        errorMessage = 'No se encontraron productos';
+        isLoading = false;
+        notifyListeners();
+      }
+    } catch (e) {
+      errorMessage = 'Error al obtener productos: $e';
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+
+
+
+  Future<void> fetchCategorias() async {
+    try {
+      final response = await repository.getCategorias();
+      categorias = List<Map<String, dynamic>>.from(response);
+      notifyListeners();
+    } catch (e) {
+      print('Error al obtener categorías: $e');
+    }
+  }
+
+  // Método para obtener el producto por su ID
+  Future<bool> fetchProductById(int id) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final producto = await repository.getProductoPorId(id);
+
+      if (producto != null) {
+        idProducto = producto.idProducto; // Asegúrate de que se esté asignando correctamente
+        nombre = producto.nombreProducto;
+        descripcion = producto.descripcion ?? '';
+        cantidadDisponible = producto.cantidadDisponible;
+        precioVenta = producto.precioVenta;
+        codigoBarras = producto.codigoBarras;
+        idCategoria = producto.idCategoria;
+        unidadMedida = producto.unidadMedida;
+
+        // Asignar la categoría desde la base de datos
+        final categorias = await repository.getCategorias();
+        final categoria = categorias.firstWhere(
+              (cat) => cat['id_categoria'] == producto.idCategoria,
+          orElse: () => {'nombre_categoria': ''},
+        );
+        this.categoria = categoria['nombre_categoria'] ?? '';
+
+        productoEncontrado = true;
+        isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        productoEncontrado = false;
+        isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      errorMessage = 'Error al obtener producto: $e';
+      productoEncontrado = false;
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+
+  Future<bool> updateProduct(Producto producto) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      if (producto.idProducto == null) {
+        errorMessage = 'El producto no tiene ID';
+        isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Actualizar el producto en el repositorio
+      await repository.updateProduct(producto);
+
+      // Almacenar el ID en el ViewModel
+      idProducto = producto.idProducto;
+
+      isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = 'Error al actualizar producto: $e';
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 
 
   Future<List<Producto>> getAllProducts() async {
@@ -77,30 +203,6 @@ class ProductoViewModel extends ChangeNotifier {
 
 
 
-
-  Future<bool> updateProduct(Producto producto) async {
-    isLoading = true;
-    notifyListeners();
-
-    try {
-      if (producto.idProducto == null) {
-        isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      await repository.updateProduct(producto);
-
-      isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      errorMessage = 'Error al actualizar producto: $e';
-      isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
 
 
 // Agrega estas variables al ViewModel

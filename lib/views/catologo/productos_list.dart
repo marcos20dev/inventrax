@@ -120,172 +120,157 @@ class _ProductoListScreenState extends State<ProductoListScreen> {
     return isDark ? Colors.tealAccent.shade400 : Colors.teal.shade400;
   }
 
-  void _showProductDetailsModal(Map<String, dynamic> producto) {
-    final TextEditingController _nombreController = TextEditingController(text: producto['nombre_producto']);
-    final TextEditingController _descripcionController = TextEditingController(text: producto['descripcion']);
-    final TextEditingController _cantidadController = TextEditingController(text: producto['cantidad_disponible'].toString());
-    final TextEditingController _precioVentaController = TextEditingController(text: producto['precio_venta'].toString());
-    final TextEditingController _proveedorController = TextEditingController(text: producto['proveedor']?.toString() ?? '');
-    final TextEditingController _codigoBarrasController = TextEditingController(text: producto['codigo_barras']?.toString() ?? '');
-    final TextEditingController _precioCompraController = TextEditingController(text: producto['precio_compra']?.toString() ?? '');
+  void _showProductDetailsModal(Map<String, dynamic> producto) async {
+    final int productoId = producto['id_producto'];
+    final viewModel = context.read<ProductoViewModel>();
 
-    String? _selectedCategoria = producto['categoria']; // Asignar la categoría seleccionada
+    // Mostrar loading mientras se cargan los datos
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
 
-    // Lista de categorías, reemplaza esto con las categorías reales disponibles
-    List<String> categorias = ['Electrónica', 'Ropa', 'Alimentos', 'Juguetes'];
+    // Cargar los datos del producto
+    final success = await viewModel.fetchProductById(productoId);
+
+    // Ocultar loading
+    Navigator.pop(context);
+
+    if (!success) {
+      showNotificationToast(
+        context,
+        message: 'Error al cargar el producto',
+        type: NotificationType.error,
+      );
+      return;
+    }
+
+    // Crear controladores con los datos del ViewModel
+    final _nombreController = TextEditingController(text: viewModel.nombre);
+    final _descripcionController = TextEditingController(text: viewModel.descripcion);
+    final _cantidadController = TextEditingController(text: viewModel.cantidadDisponible.toString());
+    final _precioVentaController = TextEditingController(text: viewModel.precioVenta.toString());
+    final _codigoBarrasController = TextEditingController(text: viewModel.codigoBarras);
+
+    // Mostrar categorías de la base de datos
+    String? _selectedCategoria = viewModel.categoriaSeleccionada;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[400],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
-                Text(
-                  'Editar Producto',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: _getPrimaryColor(context),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Categoría
-                const SizedBox(height: 20),
-                Text(
-                  'Categoría',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: _getPrimaryColor(context),
-                  ),
-                ),
-                DropdownButton<String>(
-                  value: _selectedCategoria,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedCategoria = newValue;
-                    });
-                  },
-                  items: categorias.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-
-                // Código de barras
-                _buildEditableRow('Código de Barras', _codigoBarrasController),
-
-                // Nombre
-                _buildEditableRow('Nombre', _nombreController),
-
-                // Descripción
-                _buildEditableRow('Descripción', _descripcionController),
-
-                // Cantidad
-                _buildEditableRow('Cantidad', _cantidadController),
-
-                // Precio de venta
-                _buildEditableRow('Precio de venta', _precioVentaController),
-
-                // Selección de proveedor
-                const SizedBox(height: 20),
-                Text(
-                  'Proveedor',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: _getPrimaryColor(context),
-                  ),
-                ),
-                _buildEditableRow('Proveedor', _proveedorController),
-
-                // Precio de compra
-                _buildEditableRow('Precio de compra', _precioCompraController),
-
-                const SizedBox(height: 30),
-                Row(
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final updatedProducto = {
-                            'id_producto': producto['id_producto'],
-                            'nombre_producto': _nombreController.text,
-                            'descripcion': _descripcionController.text,
-                            'cantidad_disponible': int.tryParse(_cantidadController.text) ?? 0,
-                            'precio_venta': double.tryParse(_precioVentaController.text) ?? 0.0,
-                            'proveedor': _proveedorController.text,
-                            'categoria': _selectedCategoria,
-                            'codigo_barras': _codigoBarrasController.text,
-                            'precio_compra': double.tryParse(_precioCompraController.text) ?? 0.0,
-                          };
-
-                          context.read<ProductoViewModel>().updateProduct(updatedProducto as Producto).then((success) {
-                            if (success) {
-                              showNotificationToast(context, message: 'Producto actualizado', type: NotificationType.success);
-                              Navigator.pop(context);
-                              _fetchProductos();
-                            } else {
-                              showNotificationToast(context, message: 'Error al actualizar producto', type: NotificationType.error);
-                            }
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _getPrimaryColor(context),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                        ),
-                        child: const Text(
-                          'Actualizar',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    Text(
+                      'Editar Producto',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: _getPrimaryColor(context),
                       ),
                     ),
+                    const SizedBox(height: 20),
+
+                    // Mostrar el ID del producto
+                    Text('ID Producto: ${viewModel.idProducto}'),
+
+                    const SizedBox(height: 20),
+
+                    // Categoría
+                    const SizedBox(height: 20),
+                    Text(
+                      'Categoría',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _getPrimaryColor(context),
+                      ),
+                    ),
+                    DropdownButton<String>(
+                      isExpanded: true,
+                      value: _selectedCategoria,
+                      onChanged: (String? newValue) {
+                        setModalState(() {
+                          _selectedCategoria = newValue;
+                          // Asignar la categoría seleccionada al ViewModel
+                          viewModel.categoriaSeleccionada = _selectedCategoria;
+                        });
+                      },
+                      items: viewModel.categorias.map<DropdownMenuItem<String>>((Map<String, dynamic> value) {
+                        return DropdownMenuItem<String>(
+                          value: value['id_categoria'].toString(),
+                          child: Text(value['nombre_categoria'] ?? ''),
+                        );
+                      }).toList(),
+                    ),
+
+                    // Campos de entrada
+                    _buildEditableRow('Código de Barras', _codigoBarrasController),
+                    _buildEditableRow('Nombre', _nombreController),
+                    _buildEditableRow('Descripción', _descripcionController),
+                    _buildEditableRow('Cantidad', _cantidadController),
+                    _buildEditableRow('Precio de venta', _precioVentaController),
+
+                    // Botón de actualizar
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: () {
+                        final updatedProducto = Producto(
+                          idProducto: productoId, // Asegúrate de que productoId tiene el valor correcto
+                          nombreProducto: _nombreController.text,
+                          descripcion: _descripcionController.text,
+                          cantidadDisponible: int.tryParse(_cantidadController.text) ?? 0,
+                          precioVenta: double.tryParse(_precioVentaController.text) ?? 0.0,
+                          idCategoria: int.tryParse(_selectedCategoria!) ?? 0, // Usar el valor seleccionado
+                          codigoBarras: _codigoBarrasController.text,
+                          unidadMedida: viewModel.unidadMedida,
+                        );
+
+                        context.read<ProductoViewModel>().updateProduct(updatedProducto).then((success) {
+                          if (success) {
+                            showNotificationToast(context, message: 'Producto actualizado', type: NotificationType.success);
+                            Navigator.pop(context);
+                            _fetchProductos();
+                          } else {
+                            showNotificationToast(context, message: 'Error al actualizar', type: NotificationType.error);
+                          }
+                        });
+                      },
+                      child: Text('Actualizar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _getPrimaryColor(context),
+                        minimumSize: Size(double.infinity, 50),
+                      ),
+                    )
+
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
   }
-
 
 
   Widget _buildEditableRow(String label, TextEditingController controller) {

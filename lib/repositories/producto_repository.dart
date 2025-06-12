@@ -8,6 +8,79 @@ class ProductoRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
 
 
+  Future<List<Map<String, dynamic>>> getAllProductos() async {
+    try {
+      final response = await _supabase.rpc('get_all_productos');
+
+      // Verifica si la respuesta contiene datos
+      if (response != null && response is List) {
+        return response.map((item) => Map<String, dynamic>.from(item)).toList();
+      } else {
+        throw Exception('No se encontraron productos');
+      }
+    } catch (e) {
+      print('Error al obtener todos los productos: $e');
+      throw Exception('Error al obtener todos los productos');
+    }
+  }
+
+
+
+  Future<Producto?> getProductoPorId(int idProducto) async {
+    try {
+      final response = await _supabase
+          .from('productos')
+          .select('''
+          id_producto, 
+          nombre_producto, 
+          descripcion, 
+          cantidad_disponible, 
+          unidad_medida, 
+          precio_venta, 
+          id_categoria, 
+          codigo_barras,
+          categorias(nombre_categoria)
+        ''')
+          .eq('id_producto', idProducto)
+          .single();
+
+      if (response != null) {
+        final producto = Producto.fromJson(response);
+        // Obtener el nombre de la categoría desde la relación
+        if (response['categorias'] != null) {
+          producto.categoria = response['categorias']['nombre_categoria'] as String;
+        }
+        return producto;
+      }
+      return null;
+    } catch (e) {
+      print('Error al obtener el producto: $e');
+      throw Exception('Error al obtener el producto');
+    }
+  }
+
+
+  Future<List<Map<String, dynamic>>> getCategorias() async {
+    try {
+      // Consulta usando select()
+      final response = await _supabase
+          .from('categorias')
+          .select()
+          .limit(100) // Limita los resultados si lo deseas
+          .order('created_at'); // Ordena si es necesario (opcional)
+
+      // Verifica si la respuesta tiene datos
+      if (response != null && response is List) {
+        return response.map((item) => Map<String, dynamic>.from(item)).toList();
+      } else {
+        throw Exception('No se encontraron categorías');
+      }
+    } catch (e) {
+      print('Error en getCategorias: $e');
+      throw Exception('Error al obtener categorías: $e');
+    }
+  }
+
 
   Future<Producto?> getProductoPorCodigoBarras(String codigoBarras) async {
     try {
@@ -30,9 +103,6 @@ class ProductoRepository {
   }
 
 
-
-
-  // Método para insertar producto (usado en ViewModel)
   Future<int?> insertProducto(Map<String, dynamic> producto) async {
     final response = await _supabase
         .from('productos')
