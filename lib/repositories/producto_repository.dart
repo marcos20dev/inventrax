@@ -26,6 +26,29 @@ class ProductoRepository {
 
 
 
+  Future<bool> eliminarProducto(String productoId) async {
+    try {
+      if (productoId.isEmpty) return false;
+
+      final id = int.tryParse(productoId);
+      if (id == null) return false;
+
+      // Eliminar el producto y obtener los registros borrados
+      final deletedItems = await _supabase
+          .from('productos')
+          .delete()
+          .eq('id_producto', id)
+          .select();  // Devuelve los registros eliminados
+
+      // Si `deletedItems` no está vacío, significa que se eliminó algo
+      return deletedItems.isNotEmpty;
+    } catch (e) {
+      print('Error al eliminar producto: $e');
+      return false;
+    }
+  }
+
+
   Future<Producto?> getProductoPorId(int idProducto) async {
     try {
       final response = await _supabase
