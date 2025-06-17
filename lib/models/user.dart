@@ -3,7 +3,7 @@ class User {
   final String name;
   final String lastName;
   final String email;
-  final String password; // Usado solo para auth, NO se guarda en tabla usuarios
+  final String password; // Usado solo para auth, NO se guarda en tabla usuarios_roles
   final String identityDocument;
   final String phone;
 
@@ -17,7 +17,7 @@ class User {
     required this.phone,
   });
 
-  // Para enviar datos a la tabla usuarios (registro)
+  // Para enviar datos a la tabla usuarios_roles (registro)
   Map<String, dynamic> toJson() {
     return {
       'nombre': name,

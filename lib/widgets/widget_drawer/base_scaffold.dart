@@ -32,6 +32,8 @@ class BaseScaffold extends StatelessWidget {
       drawer: const MenuDrawer(),
       body: SafeArea(
         child: Container(
+          width: double.infinity,
+          height: double.infinity,
           color: bgColor,
           child: body,
         ),

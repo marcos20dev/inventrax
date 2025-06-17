@@ -19,13 +19,13 @@ class UserRepository {
         throw Exception('User registration failed');
       }
 
-      // 2. Insertar en tabla usuarios
+      // 2. Insertar en tabla usuarios_roles
       final userData = user.toJson();
       userData.remove('password'); // Asegúrate de no incluir el password
       userData['id_usuario'] = res.user!.id;
 
       final response = await _client
-          .from('usuarios')
+          .from('usuarios_roles')
           .insert(userData)
           .select()
           .single();
@@ -47,9 +47,9 @@ class UserRepository {
       throw Exception('Credenciales incorrectas');
     }
 
-    // Opcional: obtener info extra de la tabla 'usuarios' si necesitas más datos
+    // Opcional: obtener info extra de la tabla 'usuarios_roles' si necesitas más datos
     final userData = await _client
-        .from('usuarios')
+        .from('usuarios_roles')
         .select()
         .eq('id_usuario', response.user!.id)
         .single();

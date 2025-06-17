@@ -14,6 +14,9 @@ import '../entradas_producto/entradas_form.dart';
 import '../provedores/provedor_form.dart';
 import '../provedores/provedor_list.dart';
 import '../salida_producto/salida_list.dart';
+
+import '../usuarios_roles/gestion_roles/GestionRolesList.dart';
+import '../usuarios_roles/gestion_usuarios/usuarios_list.dart';
 import '../ventas/ventas_form.dart';
 import '../ventas/ventas_list.dart';
 
@@ -105,7 +108,7 @@ class MenuDrawer extends StatelessWidget {
                 ),
                 CustomExpansionTileWidget(
                   icon: Icons.point_of_sale_outlined,
-                  title: 'Ventas',
+                  title: 'Ventas / Salida',
                   color: primaryColor,
                   children: [
                     MenuItemWidget(
@@ -193,7 +196,7 @@ class MenuDrawer extends StatelessWidget {
 
                 CustomExpansionTileWidget(
                   icon: Icons.shopping_bag_outlined,
-                  title: 'Productos',
+                  title: 'Productos / Entradas',
                   color: primaryColor,
                   children: [
                     MenuItemWidget(
@@ -205,7 +208,7 @@ class MenuDrawer extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => ProductoListScreen(),
+                            builder: (_) => InventarioScreen(),
                           ),
                         );
                       },
@@ -276,15 +279,35 @@ class MenuDrawer extends StatelessWidget {
                   color: primaryColor,
                   children: [
                     MenuItemWidget(
-                      icon: Icons.person_add,
-                      title: 'Registro',
+                      icon: Icons.manage_accounts, // o Icons.admin_panel_settings
+                      title: 'Gestión de roles',
                       color: primaryColor,
+                      onTap: () {
+                        Navigator.pop(context); // Cierra el drawer
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => GestionRolesList(),
+                          ),
+                        );
+                      },
                     ),
                     MenuItemWidget(
-                      icon: Icons.security,
-                      title: 'Permisos',
+                      icon: Icons.group, // o Icons.people
+                      title: 'Usuarios',
                       color: primaryColor,
+
+                      onTap: () {
+                        Navigator.pop(context); // Cierra el drawer
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UsuariosList(),
+                          ),
+                        );
+                      },
                     ),
+
                   ],
                 ),
               ]),

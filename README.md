@@ -130,12 +130,22 @@ Inventrax es una solución móvil moderna para la gestión integral de inventari
 ## 📁 Estructura del Proyecto Flutter
 # 🔐 usuarios
 
-| id_usuario | nombre | apellido | correo_electronico    | contraseña | documento_identidad | telefono    | created_at          |
-|------------|--------|----------|----------------------|------------|---------------------|-------------|---------------------|
-| 1          | Marco  | Ruiz     | marco@correo.com     | 123456     | 12345678            | 987654321   | 2025-05-22 10:00    |
-| 2          | Laura  | Gomez    | laura@correo.com     | abcdef     | 87654321            | 912345678   | 2025-05-22 10:01    |
+| id_usuario | nombre | apellido | correo_electronico    | contraseña | documento_identidad | telefono    | created_at          | id_rol |
+|------------|--------|----------|------------------------|------------|----------------------|-------------|---------------------|--------|
+| 1          | Marco  | Ruiz     | marco@correo.com       | 123456     | 12345678             | 987654321   | 2025-05-22 10:00    | 1      |
+| 2          | Laura  | Gomez    | laura@correo.com       | abcdef     | 87654321             | 912345678   | 2025-05-22 10:01    | 2      |
 
 ---
+
+# 🔐 roles
+
+| id_rol | nombre        | created_at          |
+|--------|---------------|---------------------|
+| 1      | Administrador | 2025-06-01 10:00:00 |
+| 2      | Usuario       | 2025-06-01 10:05:00 |
+| 3      | Invitado      | 2025-06-01 10:10:00 |
+
+
 
 # 🗂️ categorias
 
