@@ -4,6 +4,7 @@ import 'package:inventrax/repositories/cliente_repository.dart';
 import 'package:inventrax/repositories/dashboard_repository.dart';
 import 'package:inventrax/repositories/producto_repository.dart';
 import 'package:inventrax/services/ChangeNotifier.dart';
+import 'package:inventrax/services/PermisosProvider.dart';
 import 'package:inventrax/viewmodels/categoria_viewmodel.dart';
 import 'package:inventrax/viewmodels/cliente_viewmodel.dart';
 import 'package:inventrax/viewmodels/dashboard_viewmodel.dart';
@@ -11,6 +12,7 @@ import 'package:inventrax/viewmodels/producto_viewmodel.dart';
 import 'package:inventrax/viewmodels/venta/registro_venta_viewmodel.dart';
 import 'package:inventrax/views/indications/onboarding_screen.dart';
 import 'package:inventrax/views/menu/menu_screen.dart';
+import 'package:inventrax/views/usuarios_auth/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'repositories/user_repository.dart';
@@ -32,6 +34,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserSession()),
+        ChangeNotifierProvider(create: (_) => PermisosProvider()),
 
         Provider<SupabaseClient>(create: (_) => Supabase.instance.client),
         Provider<UserRepository>(
@@ -56,8 +59,6 @@ Future<void> main() async {
             return categoriaVM;
           },
         ),
-
-        // Nuevo: ProveedorRepository y ProveedorViewModel
         Provider<ProveedorRepository>(
           create: (context) =>
               ProveedorRepository(supabase: context.read<SupabaseClient>()),
@@ -104,7 +105,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Inventrax',
-      home:      MenuScreen(uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9'),
+      home:
+      //LoginScreen()
+      MenuScreen(
+        uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9',
+        rolId: 9, // <-- Asegúrate de usar el ID real del rol del usuario
+      ),
 
       //OnboardingScreen(),
       //MenuScreen(uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9'),

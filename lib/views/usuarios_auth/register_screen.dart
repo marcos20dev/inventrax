@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+import '../../models/roles.dart';
 import '../../models/user.dart';
 import '../../utils/auth/validators.dart';
 import '../../viewmodels/auth_viewmodel.dart';
@@ -28,11 +30,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _repetirPasswordController = TextEditingController();
+  List<Role> _roles = [];
+  Role? _selectedRol;
+  bool _loadingRoles = true;
+
   int _currentStep = 0;
   final primaryColor = const Color(0xFF26A69A);
   final accentColor = Color(0xFF26A69A);
   final darkColor = const Color(0xFF26A69A);
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchRoles();
+  }
+
+  Future<void> _fetchRoles() async {
+    try {
+      final response = await Supabase.instance.client.from('roles').select();
+      final roles = (response as List)
+          .map((e) => Role.fromJson(e as Map<String, dynamic>))
+          .toList();
+      setState(() {
+        _roles = roles;
+        _loadingRoles = false;
+      });
+    } catch (e) {
+      print('Error al cargar roles: $e');
+      setState(() {
+        _loadingRoles = false;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
@@ -226,6 +255,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             SizedBox(height: 3),
+                            _loadingRoles
+                                ? CircularProgressIndicator()
+                                : DropdownButtonFormField<Role>(
+                              value: _selectedRol,
+                              decoration: InputDecoration(
+                                labelText: 'Selecciona un rol',
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(color: accentColor),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: accentColor, width: 2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              items: _roles.map((rol) {
+                                return DropdownMenuItem<Role>(
+                                  value: rol,
+                                  child: Text(rol.nombre ?? 'Sin nombre'),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedRol = value;
+                                });
+                              },
+                              validator: (value) =>
+                              value == null ? 'Seleccione un rol' : null,
+                            ),
+
+
+                            SizedBox(height: 16),
+
                             AuthTextField(
                               controller: _correoController,
                               labelText: 'Correo electrónico',
@@ -369,6 +431,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: _passwordController.text,
         identityDocument: _dniController.text.trim(),
         phone: _telefonoController.text.trim(),
+        rolId: _selectedRol!.idRoles!, // Asegúrate de que no sea null
+
       );
 
       try {

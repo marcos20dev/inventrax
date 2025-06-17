@@ -6,15 +6,17 @@ class User {
   final String password; // Usado solo para auth, NO se guarda en tabla usuarios_roles
   final String identityDocument;
   final String phone;
+  final int rolId; // <-- Nuevo campo agregado
 
   User({
-    this.idUsuario,  // opcional en constructor
+    this.idUsuario,
     required this.name,
     required this.lastName,
     required this.email,
     required this.password,
     required this.identityDocument,
     required this.phone,
+    required this.rolId, // <-- Asegúrate de requerirlo
   });
 
   // Para enviar datos a la tabla usuarios_roles (registro)
@@ -23,7 +25,6 @@ class User {
       'nombre': name,
       'apellido': lastName,
       'correo_electronico': email,
-      // No enviamos 'id_usuario' ni 'contraseña' aquí
       'documento_identidad': identityDocument,
       'telefono': phone,
     };
@@ -40,8 +41,9 @@ class User {
       password: '',
       identityDocument: json['documento_identidad']?.toString() ?? '',
       phone: json['telefono']?.toString() ?? '',
+      rolId: json['id_roles'] ?? 0, // <-- Agregado desde el JSON
     );
   }
-  String get idUsuarioAsString => idUsuario?.toString() ?? '';
 
+  String get idUsuarioAsString => idUsuario?.toString() ?? '';
 }

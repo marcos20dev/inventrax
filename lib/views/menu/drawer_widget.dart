@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:inventrax/views/clientes/clientes_form.dart';
-import 'package:inventrax/views/clientes/clientes_list.dart';
+import 'package:provider/provider.dart';
 
-import '../../test.dart';
+import '../../services/ChangeNotifier.dart'; // UserSession
+import '../../services/PermisosProvider.dart';
 import '../../widgets/widget_drawer/Custom_Expansion_Widget.dart';
 import '../../widgets/widget_drawer/MenuItemWidget.dart';
 import '../../widgets/widget_drawer/Section_Title_Widget.dart';
-import '../categorias/categorias_form.dart';
-import '../categorias/categorias_list.dart';
-import '../catologo/productos_form.dart';
-import '../catologo/productos_list.dart';
-import '../entradas_producto/entradas_form.dart';
-import '../provedores/provedor_form.dart';
-import '../provedores/provedor_list.dart';
-import '../salida_producto/salida_list.dart';
 
-import '../usuarios_roles/gestion_roles/GestionRolesList.dart';
-import '../usuarios_roles/gestion_usuarios/usuarios_list.dart';
 import '../ventas/ventas_form.dart';
 import '../ventas/ventas_list.dart';
+import '../clientes/clientes_list.dart';
+import '../entradas_producto/entradas_form.dart';
+import '../salida_producto/salida_list.dart';
+import '../categorias/categorias_list.dart';
+import '../provedores/provedor_list.dart';
+import '../usuarios_roles/gestion_roles/GestionRolesList.dart';
+import '../usuarios_roles/gestion_usuarios/usuarios_list.dart';
 
 class MenuDrawer extends StatelessWidget {
   const MenuDrawer({super.key});
@@ -27,367 +24,312 @@ class MenuDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final primaryColor = isDark
-        ? Colors.tealAccent.shade400
-        : Colors.teal.shade700;
-    final surfaceColor = isDark
-        ? Colors.grey.shade900.withOpacity(0.8)
-        : Colors.white;
+    final primaryColor = isDark ? Colors.tealAccent.shade400 : Colors.teal.shade700;
+    final surfaceColor = isDark ? Colors.grey.shade900.withOpacity(0.8) : Colors.white;
     final onSurfaceColor = isDark ? Colors.white : Colors.black;
 
-    return Drawer(
-      width: 340,
-      backgroundColor: surfaceColor,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(right: Radius.circular(24)),
-      ),
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Container(
-              height: 160,
-              decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.1),
-                borderRadius: const BorderRadius.only(
-                  bottomRight: Radius.circular(24),
+    final userSession = Provider.of<UserSession>(context);
+    final int? rolId = userSession.rolId;
+
+    if (rolId == null) {
+      return const Center(child: Text("Cargando sesión..."));
+    }
+
+    return FutureBuilder(
+      future: Provider.of<PermisosProvider>(context, listen: false).cargarPermisos(rolId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final permisosProvider = Provider.of<PermisosProvider>(context);
+        bool tienePermiso(String clave) => permisosProvider.tienePermiso(clave);
+
+        return Drawer(
+          width: 340,
+          backgroundColor: surfaceColor,
+          elevation: 0,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.horizontal(right: Radius.circular(24)),
+          ),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(bottomRight: Radius.circular(24)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 24, bottom: 24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: primaryColor.withOpacity(0.2),
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.5),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(Icons.person_outline, color: primaryColor, size: 24),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Menú Principal',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: onSurfaceColor,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        Text(
+                          'Rol ID: $rolId',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: onSurfaceColor.withOpacity(0.6),
+                          ),
+                        ),
+                        Text(
+                          'Administración del sistema',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: onSurfaceColor.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 24, bottom: 24),
+
+              SliverPadding(
+                padding: const EdgeInsets.only(top: 8),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    if (tienePermiso('Registro de Ventas') ||
+                        tienePermiso('Detalle de Ventas') ||
+                        tienePermiso('Clientes')) ...[
+                      SectionTitleWidget(title: 'Gestión Comercial', color: primaryColor),
+                      CustomExpansionTileWidget(
+                        icon: Icons.point_of_sale_outlined,
+                        title: 'Ventas / Salida',
+                        color: primaryColor,
+                        children: [
+                          if (tienePermiso('Registro de Ventas'))
+                            MenuItemWidget(
+                              icon: Icons.receipt_long,
+                              title: 'Registro de Ventas',
+                              color: primaryColor,
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => VentasFormScreen()));
+                              },
+                            ),
+                          if (tienePermiso('Detalle de Ventas'))
+                            MenuItemWidget(
+                              icon: Icons.list_alt,
+                              title: 'Detalle de Ventas',
+                              color: primaryColor,
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => VentaListScreen()));
+                              },
+                            ),
+                          if (tienePermiso('Clientes'))
+                            MenuItemWidget(
+                              icon: Icons.people_outlined,
+                              title: 'Clientes',
+                              color: primaryColor,
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => ClientesListScreen()));
+                              },
+                            ),
+                        ],
+                      ),
+                    ],
+
+                    if (tienePermiso('Entradas') || tienePermiso('Salidas')) ...[
+                      SectionTitleWidget(title: 'Gestión de Inventario', color: primaryColor),
+                      CustomExpansionTileWidget(
+                        icon: Icons.inventory_2_outlined,
+                        title: 'Inventario',
+                        color: primaryColor,
+                        children: [
+                          if (tienePermiso('Entradas'))
+                            MenuItemWidget(
+                              icon: Icons.input,
+                              title: 'Entradas',
+                              color: primaryColor,
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => InventarioScreen()));
+                              },
+                            ),
+                          if (tienePermiso('Salidas'))
+                            MenuItemWidget(
+                              icon: Icons.output,
+                              title: 'Salidas',
+                              color: primaryColor,
+
+                            ),
+                        ],
+                      ),
+                    ],
+
+                    if (tienePermiso('Productos') || tienePermiso('Categorías')) ...[
+                      CustomExpansionTileWidget(
+                        icon: Icons.shopping_bag_outlined,
+                        title: 'Productos / Entradas',
+                        color: primaryColor,
+                        children: [
+                          if (tienePermiso('Productos'))
+                            MenuItemWidget(
+                              icon: Icons.grid_view,
+                              title: 'Productos',
+                              color: primaryColor,
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => InventarioScreen()));
+                              },
+                            ),
+                          if (tienePermiso('Categorías'))
+                            MenuItemWidget(
+                              icon: Icons.category,
+                              title: 'Categorías',
+                              color: primaryColor,
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => CategoriaListScreen()));
+                              },
+                            ),
+                        ],
+                      ),
+                    ],
+
+                    if (tienePermiso('Proveedores - Listado') || tienePermiso('Gestión de Roles') || tienePermiso('Usuarios')) ...[
+                      SectionTitleWidget(title: 'Administración', color: primaryColor),
+
+                      if (tienePermiso('Proveedores - Listado'))
+                        CustomExpansionTileWidget(
+                          icon: Icons.local_shipping_outlined,
+                          title: 'Proveedores',
+                          color: primaryColor,
+                          children: [
+                            MenuItemWidget(
+                              icon: Icons.business,
+                              title: 'Listado',
+                              color: primaryColor,
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => ProveedorListScreen()));
+                              },
+                            ),
+                          ],
+                        ),
+
+                      if (tienePermiso('Gestión de Roles') || tienePermiso('Usuarios'))
+                        CustomExpansionTileWidget(
+                          icon: Icons.manage_accounts,
+                          title: 'Usuarios',
+                          color: primaryColor,
+                          children: [
+                            if (tienePermiso('Gestión de Roles'))
+                              MenuItemWidget(
+                                icon: Icons.admin_panel_settings,
+                                title: 'Gestión de roles',
+                                color: primaryColor,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => GestionRolesList()));
+                                },
+                              ),
+                            if (tienePermiso('Usuarios'))
+                              MenuItemWidget(
+                                icon: Icons.group,
+                                title: 'Usuarios',
+                                color: primaryColor,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => UsuariosList()));
+                                },
+                              ),
+                          ],
+                        ),
+                    ],
+
+                    if (tienePermiso('Ajustes del sistema') || tienePermiso('Usuarios (Configuración)') || tienePermiso('Ayuda y soporte')) ...[
+                      SectionTitleWidget(title: 'Configuración', color: primaryColor),
+                      if (tienePermiso('Ajustes del sistema'))
+                        MenuItemWidget(
+                          icon: Icons.settings_outlined,
+                          title: 'Ajustes del sistema',
+                          color: primaryColor,
+                        ),
+                      if (tienePermiso('Usuarios (Configuración)'))
+                        MenuItemWidget(
+                          icon: Icons.people_outlined,
+                          title: 'Usuarios (Configuración)',
+                          color: primaryColor,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => UsuariosList()));
+                          },
+                        ),
+                      if (tienePermiso('Ayuda y soporte'))
+                        MenuItemWidget(
+                          icon: Icons.help_outline,
+                          title: 'Ayuda y soporte',
+                          color: primaryColor,
+                        ),
+                    ],
+
+                  ]),
+                ),
+              ),
+
+              SliverFillRemaining(
+                hasScrollBody: false,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: primaryColor.withOpacity(0.2),
-                        border: Border.all(
-                          color: primaryColor.withOpacity(0.5),
-                          width: 1.5,
+                    const Divider(height: 1),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.tonalIcon(
+                          icon: Icon(Icons.logout, size: 20, color: Colors.red.shade400),
+                          label: Text('Cerrar sesión', style: TextStyle(color: Colors.red.shade400)),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.red.shade50,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: () => Navigator.pop(context),
                         ),
                       ),
-                      child: Icon(
-                        Icons.person_outline,
-                        color: primaryColor,
-                        size: 24,
-                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Menú Principal',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: onSurfaceColor,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    Text(
-                      'Administración del sistema',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: onSurfaceColor.withOpacity(0.7),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        'v1.0.0',
+                        style: theme.textTheme.bodySmall?.copyWith(color: onSurfaceColor.withOpacity(0.5)),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
-
-          /// Secciones del menú
-          SliverPadding(
-            padding: const EdgeInsets.only(top: 8),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                SectionTitleWidget(
-                  title: 'Gestión Comercial',
-                  color: primaryColor,
-                ),
-                CustomExpansionTileWidget(
-                  icon: Icons.point_of_sale_outlined,
-                  title: 'Ventas / Salida',
-                  color: primaryColor,
-                  children: [
-                    MenuItemWidget(
-                      icon: Icons.receipt_long,
-                      title: 'Registro de Ventas',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => VentasFormScreen()),
-                        );
-                      },
-                    ),
-                    MenuItemWidget(
-                      icon: Icons.list_alt,
-                      title: 'Detalle de Ventas',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => VentaListScreen()),
-                        );
-                      },
-                    ),
-                    MenuItemWidget(
-                      icon: Icons.people_outlined,
-                      title: 'Clientes',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ClientesListScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
-                SectionTitleWidget(
-                  title: 'Gestión de Inventario',
-                  color: primaryColor,
-                ),
-                CustomExpansionTileWidget(
-                  icon: Icons.inventory_2_outlined,
-                  title: 'Inventario',
-                  color: primaryColor,
-                  children: [
-                    //MenuItemWidget(
-    //icon: Icons.compare_arrows,
-    //title: 'Movimientos',
-    // color: primaryColor,
-                    //),
-                    MenuItemWidget(
-                      icon: Icons.input,
-                      title: 'Entradas',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => InventarioScreen()),
-                        );
-                      },
-                    ),
-                    MenuItemWidget(
-                      icon: Icons.output,
-                      title: 'Salidas',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => VentasScreen()),
-                        );
-                      },
-                    ),
-
-                  ],
-                ),
-
-                CustomExpansionTileWidget(
-                  icon: Icons.shopping_bag_outlined,
-                  title: 'Productos / Entradas',
-                  color: primaryColor,
-                  children: [
-                    MenuItemWidget(
-                      icon: Icons.grid_view,
-                      title: 'Productos',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => InventarioScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    MenuItemWidget(
-                      icon: Icons.category,
-                      title: 'Categorías',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CategoriaListScreen(),
-                          ),
-                        );
-                      },
-                    ),
-              // MenuItemWidget(
-              // icon: Icons.label,
-              //     title: 'Marcas',
-              //   color: primaryColor,
-    //   onTap: () {
-    //     Navigator.pop(context); // Cierra el drawer
-    //     Navigator.push(
-    //       context,
-    //      MaterialPageRoute(builder: (_) => TestDashboard()),
-    //    );
-              //  },
-                    //  ),
-                  ],
-                ),
-
-                SectionTitleWidget(
-                  title: 'Administración',
-                  color: primaryColor,
-                ),
-                CustomExpansionTileWidget(
-                  icon: Icons.local_shipping_outlined,
-                  title: 'Proveedores',
-                  color: primaryColor,
-                  children: [
-                    MenuItemWidget(
-                      icon: Icons.business,
-                      title: 'Listado',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ProveedorListScreen(),
-                          ),
-                        );
-                      },
-                    ),
-              //  MenuItemWidget(
-              //   icon: Icons.shopping_cart,
-              //    title: 'Órdenes de Compra',
-              //    color: primaryColor,
-                    //  ),
-                  ],
-                ),
-
-                CustomExpansionTileWidget(
-                  icon: Icons.manage_accounts,
-                  title: 'Usuarios',
-                  color: primaryColor,
-                  children: [
-                    MenuItemWidget(
-                      icon: Icons.manage_accounts, // o Icons.admin_panel_settings
-                      title: 'Gestión de roles',
-                      color: primaryColor,
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => GestionRolesList(),
-                          ),
-                        );
-                      },
-                    ),
-                    MenuItemWidget(
-                      icon: Icons.group, // o Icons.people
-                      title: 'Usuarios',
-                      color: primaryColor,
-
-                      onTap: () {
-                        Navigator.pop(context); // Cierra el drawer
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => UsuariosList(),
-                          ),
-                        );
-                      },
-                    ),
-
-                  ],
-                ),
-              ]),
-            ),
-          ),
-
-          /// Sección secundaria
-          SliverPadding(
-            padding: const EdgeInsets.only(top: 8),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                SectionTitleWidget(title: 'Configuración', color: primaryColor),
-                MenuItemWidget(
-                  icon: Icons.settings_outlined,
-                  title: 'Ajustes del sistema',
-                  color: primaryColor,
-                ),
-                MenuItemWidget(
-                  icon: Icons.people_outlined,
-                  title: 'Usuarios',
-                  color: primaryColor,
-                ),
-                MenuItemWidget(
-                  icon: Icons.help_outline,
-                  title: 'Ayuda y soporte',
-                  color: primaryColor,
-                ),
-              ]),
-            ),
-          ),
-
-          /// Pie de página
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Divider(height: 1),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.tonalIcon(
-                      icon: Icon(
-                        Icons.logout,
-                        size: 20,
-                        color: Colors.red.shade400,
-                      ),
-                      label: Text(
-                        'Cerrar sesión',
-                        style: TextStyle(color: Colors.red.shade400),
-                      ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.red.shade50,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    'v2.4.0',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: onSurfaceColor.withOpacity(0.5),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

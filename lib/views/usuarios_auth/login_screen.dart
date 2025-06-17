@@ -44,12 +44,13 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(
             builder: (_) => MenuScreen(
               uid: authViewModel.user!.idUsuarioAsString,
-              showWelcomeNotification: true,  // indica que muestre la notificación
+              rolId: authViewModel.user!.rolId,
+              showWelcomeNotification: true,
             ),
           ),
         );
-
       }
+
 
     }
   }

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../services/ChangeNotifier.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';  // Asegúrate de importar el ViewModel
 import '../../widgets/widget_notification/Notification_Toast.dart';
 import 'drawer_widget.dart';
 
 class MenuScreen extends StatefulWidget {
   final String uid;
+  final int rolId;
+
   final bool showWelcomeNotification;
 
   const MenuScreen({
     Key? key,
     required this.uid,
+    required this.rolId,
+
     this.showWelcomeNotification = false,
   }) : super(key: key);
 
@@ -22,7 +27,16 @@ class _MenuScreenState extends State<MenuScreen> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userSession = context.read<UserSession>();
+
+      // Inicializar el provider con UID y RolID
+      userSession.setUid(widget.uid);
+      userSession.setRolId(widget.rolId);
+
+      print("✅ Provider inicializado correctamente");
+
       context.read<DashboardViewModel>().fetchDashboardData();
     });
 
