@@ -112,9 +112,9 @@ class MenuDrawer extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 8),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    if (tienePermiso('Registro de Ventas') ||
-                        tienePermiso('Detalle de Ventas') ||
-                        tienePermiso('Clientes')) ...[
+
+                    // GESTIÓN COMERCIAL
+                    if (tienePermiso('Registro de Ventas') || tienePermiso('Detalle de Ventas') || tienePermiso('Clientes')) ...[
                       SectionTitleWidget(title: 'Gestión Comercial', color: primaryColor),
                       CustomExpansionTileWidget(
                         icon: Icons.point_of_sale_outlined,
@@ -155,64 +155,71 @@ class MenuDrawer extends StatelessWidget {
                       ),
                     ],
 
-                    if (tienePermiso('Entradas') || tienePermiso('Salidas')) ...[
+                    // INVENTARIO
+                    // GESTIÓN DE INVENTARIO
+                    if (tienePermiso('Entradas') || tienePermiso('Salidas') || tienePermiso('Productos')) ...[
                       SectionTitleWidget(title: 'Gestión de Inventario', color: primaryColor),
-                      CustomExpansionTileWidget(
-                        icon: Icons.inventory_2_outlined,
-                        title: 'Inventario',
-                        color: primaryColor,
-                        children: [
-                          if (tienePermiso('Entradas'))
-                            MenuItemWidget(
-                              icon: Icons.input,
-                              title: 'Entradas',
-                              color: primaryColor,
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.push(context, MaterialPageRoute(builder: (_) => InventarioScreen()));
-                              },
-                            ),
-                          if (tienePermiso('Salidas'))
-                            MenuItemWidget(
-                              icon: Icons.output,
-                              title: 'Salidas',
-                              color: primaryColor,
 
-                            ),
-                        ],
-                      ),
+                      // Subgrupo: Inventario (Entradas + Salidas)
+                      if (tienePermiso('Entradas') || tienePermiso('Salidas'))
+                        CustomExpansionTileWidget(
+                          icon: Icons.inventory_2_outlined,
+                          title: 'Inventario',
+                          color: primaryColor,
+                          children: [
+                            if (tienePermiso('Entradas'))
+                              MenuItemWidget(
+                                icon: Icons.input,
+                                title: 'Entradas',
+                                color: primaryColor,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => InventarioScreen()));
+                                },
+                              ),
+                            if (tienePermiso('Salidas'))
+                              MenuItemWidget(
+                                icon: Icons.output,
+                                title: 'Salidas',
+                                color: primaryColor,
+
+                              ),
+                          ],
+                        ),
+
+                      // Subgrupo: Productos / Entradas
+                      if (tienePermiso('Productos') || tienePermiso('Categorías'))
+                        CustomExpansionTileWidget(
+                          icon: Icons.shopping_bag_outlined,
+                          title: 'Productos / Entradas',
+                          color: primaryColor,
+                          children: [
+                            if (tienePermiso('Productos'))
+                              MenuItemWidget(
+                                icon: Icons.grid_view,
+                                title: 'Productos',
+                                color: primaryColor,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => InventarioScreen()));
+                                },
+                              ),
+                            if (tienePermiso('Categorías'))
+                              MenuItemWidget(
+                                icon: Icons.category,
+                                title: 'Categorías',
+                                color: primaryColor,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => CategoriaListScreen()));
+                                },
+                              ),
+                          ],
+                        ),
+
                     ],
 
-                    if (tienePermiso('Productos') || tienePermiso('Categorías')) ...[
-                      CustomExpansionTileWidget(
-                        icon: Icons.shopping_bag_outlined,
-                        title: 'Productos / Entradas',
-                        color: primaryColor,
-                        children: [
-                          if (tienePermiso('Productos'))
-                            MenuItemWidget(
-                              icon: Icons.grid_view,
-                              title: 'Productos',
-                              color: primaryColor,
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.push(context, MaterialPageRoute(builder: (_) => InventarioScreen()));
-                              },
-                            ),
-                          if (tienePermiso('Categorías'))
-                            MenuItemWidget(
-                              icon: Icons.category,
-                              title: 'Categorías',
-                              color: primaryColor,
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.push(context, MaterialPageRoute(builder: (_) => CategoriaListScreen()));
-                              },
-                            ),
-                        ],
-                      ),
-                    ],
-
+                    // ADMINISTRACIÓN
                     if (tienePermiso('Proveedores - Listado') || tienePermiso('Gestión de Roles') || tienePermiso('Usuarios')) ...[
                       SectionTitleWidget(title: 'Administración', color: primaryColor),
 
@@ -264,6 +271,7 @@ class MenuDrawer extends StatelessWidget {
                         ),
                     ],
 
+                    // CONFIGURACIÓN
                     if (tienePermiso('Ajustes del sistema') || tienePermiso('Usuarios (Configuración)') || tienePermiso('Ayuda y soporte')) ...[
                       SectionTitleWidget(title: 'Configuración', color: primaryColor),
                       if (tienePermiso('Ajustes del sistema'))
@@ -289,11 +297,11 @@ class MenuDrawer extends StatelessWidget {
                           color: primaryColor,
                         ),
                     ],
-
                   ]),
                 ),
               ),
 
+              // FOOTER
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Column(
@@ -312,7 +320,11 @@ class MenuDrawer extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () {
+                            Navigator.pop(context); // Cierra el Drawer primero
+                            Provider.of<UserSession>(context, listen: false).cerrarSesion(context);
+                          },
+
                         ),
                       ),
                     ),

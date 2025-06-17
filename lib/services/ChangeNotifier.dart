@@ -1,4 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import '../views/usuarios_auth/login_screen.dart';
 
 class UserSession extends ChangeNotifier {
   String? _uid;
@@ -21,5 +24,14 @@ class UserSession extends ChangeNotifier {
     _uid = null;
     _rolId = null;
     notifyListeners();
+  }
+  void cerrarSesion(BuildContext context) {
+    _uid = null;
+    _rolId = null;
+    notifyListeners();
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => LoginScreen()), // O el nombre de tu login
+    );
   }
 }

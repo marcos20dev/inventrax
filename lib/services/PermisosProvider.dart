@@ -7,17 +7,16 @@ class PermisosProvider extends ChangeNotifier {
   Map<String, bool> get permisos => _permisos;
 
   Future<void> cargarPermisos(int rolId) async {
+    if (_permisos.isNotEmpty) return; // << evita recarga innecesaria
     try {
       final repo = DrawerRepository();
       _permisos = await repo.obtenerPermisosPorRol(rolId.toString());
-
-      print("🚀 Permisos cargados para rol $rolId: $_permisos");
-
       notifyListeners();
     } catch (e) {
       print("❌ Error al cargar permisos: $e");
     }
   }
+
 
   bool tienePermiso(String clave) {
     return _permisos[clave] ?? false;
