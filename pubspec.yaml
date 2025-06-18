@@ -53,6 +53,10 @@ dependencies:
   widgets_to_image: ^1.0.0
   syncfusion_flutter_charts: ^29.2.8
   syncfusion_flutter_calendar: ^29.2.8
+  url_launcher: ^6.3.1
+  font_awesome_flutter: ^10.8.0
+
+
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +99,7 @@ flutter:
     - assets/scan_sound.mp3
     - assets/code1.png
     - assets/icon_barras1.png
+    - assets/whatsapp.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -202,4 +202,35 @@ class ProductoRepository {
       throw Exception('Error al eliminar producto: $e');
     }
   }
+
+
+  Future<void> aumentarStockProducto({
+    required int idProducto,
+    required int cantidad,
+    required int idProveedor,
+    required double precioCompra,
+    required String idUsuario,
+  }) async {
+    try {
+      final response = await _supabase.rpc('actualizar_stock_producto', params: {
+        'p_id_producto': idProducto,
+        'p_cantidad': cantidad,
+        'p_id_proveedor': idProveedor,
+        'p_precio_compra': precioCompra,
+        'p_id_usuario': idUsuario,
+      });
+
+
+      print("✅ Stock actualizado correctamente");
+      print("📦 RPC response: $response"); // Normalmente será `null` si tu función retorna `void`
+    } catch (e) {
+      print("❌ Error al actualizar el stock: $e");
+      rethrow;
+    }
+  }
+
+
+
+
+
 }

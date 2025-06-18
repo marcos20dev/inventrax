@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 import '../../repositories/producto_repository.dart';
+import '../../services/ChangeNotifier.dart';
 import '../../viewmodels/producto_viewmodel.dart';
 import '../../widgets/widget_drawer/base_scaffold.dart';
 import '../../widgets/widget_notification/Notification_Toast.dart';
@@ -930,14 +932,41 @@ class _InventarioScreenState extends State<InventarioScreen> {
                       // Botón Añadir
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             final cantidad = int.tryParse(cantidadController.text) ?? 0;
+
                             if (cantidad > 0) {
-                              Navigator.pop(context);
-                              _mostrarSnackbarConfirmacion(context, cantidad);
+                              final int idProducto = producto['id_producto'];
+                              final int idProveedor = 1; // ← Reemplaza con proveedor real
+                              final double precioCompra = double.tryParse(producto['precio_venta'].toString()) ?? 0;
+                              final String? idUsuario = Provider.of<UserSession>(context, listen: false).uid;
+
+                              if (idUsuario == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("⚠️ Usuario no autenticado")),
+                                );
+                                return;
+                              }
+
+                              try {
+                                await ProductoRepository().aumentarStockProducto(
+                                  idProducto: idProducto,
+                                  cantidad: cantidad,
+                                  idProveedor: idProveedor,
+                                  precioCompra: precioCompra,
+                                  idUsuario: idUsuario,
+                                );
+
+                                Navigator.pop(context); // Cierra el diálogo si todo fue bien
+                                _mostrarSnackbarConfirmacion(context, cantidad);
+                              } catch (e) {
+                                print("❌ Error al actualizar stock: $e");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("❌ Error al actualizar stock")),
+                                );
+                              }
                             } else {
-                              // Vibración haptic para feedback
-                              HapticFeedback.lightImpact();
+                              HapticFeedback.lightImpact(); // feedback si no se ingresó cantidad válida
                             }
                           },
                           style: ElevatedButton.styleFrom(
