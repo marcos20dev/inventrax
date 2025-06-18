@@ -321,7 +321,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: primaryColor,
+                          color: Color(0xFFFDFDFD),
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(12),
                             bottomLeft: Radius.circular(12),
@@ -338,7 +338,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                                 child: Text(
                                   value,
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Colors.black,
                                     fontSize: 14,
                                   ),
                                 ),
@@ -352,7 +352,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                             });
                           },
                           underline: Container(),
-                          icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                          icon: Icon(Icons.arrow_drop_down, color: Colors.black),
                           dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white,
                         ),
                       ),
@@ -453,7 +453,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: productosFiltrados.length,
-                  separatorBuilder: (context, index) => Divider(height: 1),
+                  separatorBuilder: (context, index) => Divider(height: 20),
                   itemBuilder: (context, index) {
                     final producto = productosFiltrados[index];
                     final stockActual = int.parse(producto["stock_actual"].toString());
