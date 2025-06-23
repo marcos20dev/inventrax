@@ -6,6 +6,30 @@ class VentaRepository {
 
   VentaRepository(this._supabase);
 
+
+  Future<bool> verificarStockDisponible(int idProducto, int cantidad) async {
+    try {
+      // Obtener el stock disponible del producto
+      final response = await _supabase
+          .from('productos')
+          .select('cantidad_disponible')
+          .eq('id_producto', idProducto)
+          .single();
+
+      if (response == null) {
+        return false;
+      }
+
+      double stockDisponible = response['cantidad_disponible'] ?? 0;
+      // Verificar si la cantidad que se desea vender es mayor que el stock disponible
+      return cantidad <= stockDisponible;
+    } catch (e) {
+      print('Error al verificar stock disponible: $e');
+      return false;
+    }
+  }
+
+
   Future<int?> registrarVenta({
     required int idCliente,
     required String idUsuario,

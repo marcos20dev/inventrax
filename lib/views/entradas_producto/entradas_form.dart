@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
+import '../../models/producto.dart';
 import '../../repositories/producto_repository.dart';
 import '../../services/ChangeNotifier.dart';
 import '../../viewmodels/producto_viewmodel.dart';
@@ -450,7 +451,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
                   padding: const EdgeInsets.all(20.0),
                   child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(primaryColor)),
                 )
-                    : ListView.separated(
+                    : // Modificación en el ListView:
+                ListView.separated(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: productosFiltrados.length,
@@ -622,8 +624,20 @@ class _InventarioScreenState extends State<InventarioScreen> {
                                     ),
                                   ),
                                   Spacer(),
+                                  // Agregar el icono para mostrar la descripción
+                                  IconButton(
+                                    icon: Icon(Icons.edit_attributes, size: 20),
+                                    color: primaryColor,
+                                    onPressed: () async {
+                                      // Obtener la descripción del producto
+                                      final productoRepo = ProductoRepository();
+                                      final productoDetails = await productoRepo.getProductoPorId(producto["id_producto"]);
 
-
+                                      if (productoDetails != null) {
+                                        _showDescriptionDialog(context, productoDetails);
+                                      }
+                                    },
+                                  ),
                                   IconButton(
                                     icon: Icon(Icons.delete, size: 20),
                                     color: Colors.red[400],
@@ -658,7 +672,6 @@ class _InventarioScreenState extends State<InventarioScreen> {
                                       }
                                     },
                                   ),
-
                                   IconButton(
                                     icon: Icon(Icons.add, size: 20),
                                     color: primaryColor,
@@ -675,8 +688,11 @@ class _InventarioScreenState extends State<InventarioScreen> {
                       ),
                     );
                   },
-                ),
-              ],
+                )
+
+// Función para mostrar el diálogo con la descripción y el campo para editar
+
+        ],
             ),
           ),
         ),
@@ -695,6 +711,197 @@ class _InventarioScreenState extends State<InventarioScreen> {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
+    );
+  }
+
+  // Función para mostrar el diálogo con la descripción y el campo para editar
+  void _showDescriptionDialog(BuildContext context, Producto producto) {
+    final TextEditingController _descripcionController =
+    TextEditingController(text: producto.descripcion ?? '');
+    final primaryColor = Colors.teal.shade400;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
+          elevation: 0,
+          insetPadding: const EdgeInsets.all(24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header con icono
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.description_rounded,
+                            color: primaryColor, size: 28),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        "Descripción del Producto",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: isDarkMode ? Colors.white : Colors.grey[900],
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Sección de descripción actual
+                  Text(
+                    "Descripción actual:",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey[800] : Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      producto.descripcion != null && producto.descripcion!.isNotEmpty
+                          ? producto.descripcion!
+                          : "No hay descripción disponible.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white : Colors.grey[800],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Campo de edición
+                  TextField(
+                    controller: _descripcionController,
+                    maxLines: 5,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.grey[900],
+                      fontSize: 16,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: "Editar descripción",
+                      labelStyle: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                      filled: true,
+                      fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.all(16),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: primaryColor, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Botones de acción
+                  Row(
+                    children: [
+                      // Botón Cancelar
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(
+                              color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            "CANCELAR",
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+
+                      // Botón Guardar
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            // Actualiza la descripción del objeto Producto
+                            producto.descripcion = _descripcionController.text;
+
+                            // Guardar la descripción actualizada en la base de datos
+                            try {
+                              final productoRepo = ProductoRepository();
+                              await productoRepo.updateProduct(producto);
+
+                              Navigator.of(context).pop();
+
+                              showNotificationToast(
+                                context,
+                                message: "Descripción actualizada correctamente",
+                                type: NotificationType.success,
+                              );
+                            } catch (e) {
+                              showNotificationToast(
+                                context,
+                                message: "Error al actualizar la descripción",
+                                type: NotificationType.error,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                          ),
+                          child: const Text(
+                            "GUARDAR",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

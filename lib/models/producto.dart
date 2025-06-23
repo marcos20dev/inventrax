@@ -1,7 +1,7 @@
 class Producto {
   final int? idProducto;
   final String nombreProducto;
-  final String descripcion;
+  String? descripcion; // Hacer descripcion nullable
   final int cantidadDisponible; // Esta es la que representa el stock actual
   final String unidadMedida;
   final double precioVenta;
@@ -13,7 +13,7 @@ class Producto {
   Producto({
     this.idProducto,
     required this.nombreProducto,
-    required this.descripcion,
+    this.descripcion, // Cambiar para que pueda ser null
     required this.cantidadDisponible,
     required this.unidadMedida,
     required this.precioVenta,
@@ -27,7 +27,7 @@ class Producto {
     return Producto(
       idProducto: json['id_producto'] as int?,
       nombreProducto: json['nombre_producto'] as String,
-      descripcion: json['descripcion'] as String,
+      descripcion: json['descripcion'] as String?, // Descripción nullable
       cantidadDisponible: json['cantidad_disponible'] as int,
       unidadMedida: json['unidad_medida'] as String,
       precioVenta: (json['precio_venta'] as num).toDouble(),
@@ -38,14 +38,14 @@ class Producto {
           : null,
       categoria: json['categorias'] != null
           ? json['categorias']['nombre_categoria'] as String?
-          : null,  // Asigna el nombre de la categoría
+          : null, // Asigna el nombre de la categoría
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'nombre_producto': nombreProducto,
-      'descripcion': descripcion,
+      'descripcion': descripcion, // Permitir que sea null
       'cantidad_disponible': cantidadDisponible,
       'unidad_medida': unidadMedida,
       'precio_venta': precioVenta,

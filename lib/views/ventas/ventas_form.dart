@@ -140,6 +140,14 @@ class VentasFormScreen extends StatelessWidget {
     );
   }
 
+  void _mostrarMensajeStockInsuficiente(BuildContext context) {
+    showNotificationToast(
+      context,
+      message: 'No hay suficiente stock para uno o más productos.',
+      type: NotificationType.warning,
+      verticalPositionFactor: 0.08,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -737,6 +745,30 @@ class VentasFormScreen extends StatelessWidget {
                           onPressed: registroVentaVM.isLoading
                               ? null
                               : () async {
+                            // Verificación del stock antes de proceder con la venta
+                            bool stockValido = true;
+
+                            // Recorrer todos los productos y verificar el stock
+                            for (var producto in ventasVM.productos) {
+                              final cantidad = producto['cantidad'];
+                              final idProducto = producto['id_producto'];
+
+                              // Verificamos si hay suficiente stock disponible
+                              bool hayStock = await VentaRepository(Supabase.instance.client)
+                                  .verificarStockDisponible(idProducto, cantidad);
+
+                              if (!hayStock) {
+                                stockValido = false;
+                                break;  // Si algún producto no tiene suficiente stock, detenemos la verificación
+                              }
+                            }
+
+                            if (!stockValido) {
+                              _mostrarMensajeStockInsuficiente(context);  // Muestra un mensaje si no hay suficiente stock
+                              return;  // Detenemos el proceso de registro de la venta
+                            }
+
+                            // Si el stock es válido, continuamos con el registro de la venta
                             if (_formKey.currentState?.validate() ?? false) {
                               if (registroVentaVM.productos.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -785,6 +817,7 @@ class VentasFormScreen extends StatelessWidget {
                               ventasVM.resetForm();
                             }
                           },
+
 
                           child: registroVentaVM.isLoading
                               ? SizedBox(
