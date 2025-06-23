@@ -19,10 +19,10 @@ class ProductoRepository {
         throw Exception('No se encontraron productos');
       }
     } catch (e) {
-      print('Error al obtener todos los productos: $e');
       throw Exception('Error al obtener todos los productos');
     }
   }
+
 
 
 
@@ -220,11 +220,13 @@ class ProductoRepository {
         'p_id_usuario': idUsuario,
       });
 
-
-      print("✅ Stock actualizado correctamente");
-      print("📦 RPC response: $response"); // Normalmente será `null` si tu función retorna `void`
+      if (response != null) {
+        // Aquí puedes procesar el producto actualizado
+        final updatedProducto = Producto.fromJson(response[0]);
+        // Actualiza el estado o la UI con los nuevos datos del producto
+      } else {
+      }
     } catch (e) {
-      print("❌ Error al actualizar el stock: $e");
       rethrow;
     }
   }

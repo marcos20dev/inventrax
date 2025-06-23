@@ -88,6 +88,7 @@ class VentasViewModel extends ChangeNotifier {
     if (codigo.isNotEmpty) {
       buscarProductoPorCodigo(codigo);
     } else {
+      _productoSeleccionado = null; // <- IMPORTANTE: limpiar aquí
       nombreProductoController.clear();
       descripcionProductoController.clear();
       precioController.clear();
@@ -95,6 +96,7 @@ class VentasViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   void _onInputChanged() {
     notifyListeners();

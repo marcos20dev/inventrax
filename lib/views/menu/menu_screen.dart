@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/ChangeNotifier.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';  // Asegúrate de importar el ViewModel
 import '../../widgets/widget_notification/Notification_Toast.dart';
@@ -40,7 +41,6 @@ class _MenuScreenState extends State<MenuScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userSession = context.read<UserSession>();
 
-      // Inicializar el provider con UID y RolID
       userSession.setUid(widget.uid);
       userSession.setRolId(widget.rolId);
 
@@ -74,11 +74,47 @@ class _MenuScreenState extends State<MenuScreen> {
 
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text('Menú'),
         backgroundColor: appbarColor,
-        scrolledUnderElevation: 0, // Elimina el efecto al hacer scroll.
+        scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Menú'),
+            FutureBuilder(
+              future: Supabase.instance.client.rpc('obtener_rol_usuario', params: {'uid': widget.uid}),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox(); // indicador opcional
+                } else if (snapshot.hasError) {
+                  return const Text("Error");
+                } else if (snapshot.hasData) {
+                  final rol = (snapshot.data as List).first['nombre_rol'] ?? '...';
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.teal.shade50,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      rol,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.teal,
+                      ),
+                    ),
+                  );
+                }
+                return const Text("...");
+              },
+            ),
+          ],
+        )
+
       ),
+
+
 
       drawer: const MenuDrawer(),
       body: Consumer<DashboardViewModel>(
@@ -177,11 +213,6 @@ class _MenuScreenState extends State<MenuScreen> {
                     color: Colors.grey[500],
                     letterSpacing: 1.8,
                   ),
-                ),
-                Icon(
-                  Icons.more_horiz,
-                  color: Colors.grey[400],
-                  size: 20,
                 ),
               ],
             ),

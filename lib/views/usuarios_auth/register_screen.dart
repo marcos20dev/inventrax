@@ -12,6 +12,7 @@ import '../../widgets/widgets_auth/auth_textfield.dart';
 import '../../widgets/widgets_auth/step_indicator.dart';
 import 'package:flutter/services.dart';
 
+import '../usuarios_roles/gestion_usuarios/usuarios_list.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -30,9 +31,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _repetirPasswordController = TextEditingController();
+
+
   List<Role> _roles = [];
   Role? _selectedRol;
   bool _loadingRoles = true;
+
 
   int _currentStep = 0;
   final primaryColor = const Color(0xFF26A69A);
@@ -452,9 +456,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (_) => const LoginScreen(showSuccessMessage: true),
+              builder: (_) => UsuariosList(), // Asegúrate de que no tenga `const` si no lo necesita
             ),
           );
+
 
 
         } else {

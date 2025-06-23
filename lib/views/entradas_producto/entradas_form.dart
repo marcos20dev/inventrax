@@ -34,21 +34,20 @@ class _InventarioScreenState extends State<InventarioScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   bool _isRefreshing = false;
 
+  final productosRepo = ProductoRepository(); // O como lo estés inyectando
+
   Future<void> getProductos() async {
     try {
-      final response = await _supabase.rpc('get_all_productos');
-      if (response != null && response is List) {
-        setState(() {
-          productos = response
-              .map((item) => Map<String, dynamic>.from(item))
-              .toList();
-          _aplicarFiltros();
-        });
-      }
+      final data = await productosRepo.getAllProductos(); // 👈 Llamas al repo
+      setState(() {
+        productos = data;
+        _aplicarFiltros();
+      });
     } catch (e) {
-      print('Error al obtener productos: $e');
+      print('Error al obtener productos desde el repo: $e');
     }
   }
+
 
   Future<void> _handleRefresh() async {
     setState(() {
@@ -98,7 +97,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
       case 'STOCK MEDIO':
         resultados = resultados.where((p) {
           int stock = int.parse(p["stock_actual"].toString());
-          int stockInicial = int.parse(p["cantidad_inicial"].toString());
+          int stockInicial = int.tryParse(p["cantidad_inicial"]?.toString() ?? '') ?? 1;
           double porcentaje = (stock / stockInicial) * 100;
           return porcentaje >= 20 && porcentaje < 50;
         }).toList();
@@ -106,7 +105,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
       case 'STOCK ALTO':
         resultados = resultados.where((p) {
           int stock = int.parse(p["stock_actual"].toString());
-          int stockInicial = int.parse(p["cantidad_inicial"].toString());
+          int stockInicial = int.tryParse(p["cantidad_inicial"]?.toString() ?? '') ?? 1;
           double porcentaje = (stock / stockInicial) * 100;
           return porcentaje >= 50;
         }).toList();
@@ -459,7 +458,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                   itemBuilder: (context, index) {
                     final producto = productosFiltrados[index];
                     final stockActual = int.parse(producto["stock_actual"].toString());
-                    final stockInicial = int.parse(producto["cantidad_inicial"].toString());
+                    final stockInicial = int.tryParse(producto["cantidad_inicial"]?.toString() ?? '') ?? 1;
                     final porcentajeStock = (stockActual / stockInicial) * 100;
 
                     return Container(
@@ -935,13 +934,48 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           onPressed: () async {
                             final cantidad = int.tryParse(cantidadController.text) ?? 0;
 
+                            print("🔢 Cantidad ingresada: $cantidad");
+                            print("📦 Producto recibido: $producto");
+                            print("🆔 ID del producto: ${producto['id_producto']}"); // Revisa el valor exacto
+
                             if (cantidad > 0) {
-                              final int idProducto = producto['id_producto'];
-                              final int idProveedor = 1; // ← Reemplaza con proveedor real
-                              final double precioCompra = double.tryParse(producto['precio_venta'].toString()) ?? 0;
-                              final String? idUsuario = Provider.of<UserSession>(context, listen: false).uid;
+                              final idProductoRaw = producto['id_producto'];
+
+                              print("🆔 ID bruto del producto: $idProductoRaw");
+
+                              if (idProductoRaw == null || idProductoRaw.toString().isEmpty) {
+                                print("❌ Producto sin ID válido (null o vacío)");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("❌ Error: Producto sin ID válido")),
+                                );
+                                return;
+                              }
+
+                              final int? idProducto = int.tryParse(idProductoRaw.toString());
+
+                              if (idProducto == null || idProducto <= 0) {
+                                print("❌ ID de producto no válido después del parseo: $idProducto");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("❌ Error: ID de producto no válido")),
+                                );
+                                return;
+                              }
+
+                              final int idProveedor = 1; // ← Cambiar cuando tengas proveedor dinámico
+                              final precioVentaRaw = producto['precio_venta'];
+
+                              print("💰 Precio de venta (raw): $precioVentaRaw");
+
+                              final double precioCompra =
+                                  double.tryParse(precioVentaRaw?.toString() ?? '') ?? 0;
+
+                              final String? idUsuario =
+                                  Provider.of<UserSession>(context, listen: false).uid;
+
+                              print("👤 ID del usuario actual: $idUsuario");
 
                               if (idUsuario == null) {
+                                print("⚠️ Usuario no autenticado");
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text("⚠️ Usuario no autenticado")),
                                 );
@@ -949,6 +983,9 @@ class _InventarioScreenState extends State<InventarioScreen> {
                               }
 
                               try {
+                                print("🚀 Enviando datos a aumentarStockProducto...");
+                                print("📤 Datos enviados → ID producto: $idProducto, Cantidad: $cantidad, ID proveedor: $idProveedor, Precio compra: $precioCompra, ID usuario: $idUsuario");
+
                                 await ProductoRepository().aumentarStockProducto(
                                   idProducto: idProducto,
                                   cantidad: cantidad,
@@ -957,7 +994,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
                                   idUsuario: idUsuario,
                                 );
 
-                                Navigator.pop(context); // Cierra el diálogo si todo fue bien
+                                print("✅ Stock actualizado exitosamente");
+                                Navigator.pop(context);
                                 _mostrarSnackbarConfirmacion(context, cantidad);
                               } catch (e) {
                                 print("❌ Error al actualizar stock: $e");
@@ -966,7 +1004,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
                                 );
                               }
                             } else {
-                              HapticFeedback.lightImpact(); // feedback si no se ingresó cantidad válida
+                              print("⚠️ Cantidad inválida: $cantidad");
+                              HapticFeedback.lightImpact();
                             }
                           },
                           style: ElevatedButton.styleFrom(

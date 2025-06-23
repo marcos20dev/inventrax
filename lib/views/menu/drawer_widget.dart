@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../services/ChangeNotifier.dart'; // UserSession
 import '../../services/PermisosProvider.dart';
@@ -16,6 +17,7 @@ import '../categorias/categorias_list.dart';
 import '../provedores/provedor_list.dart';
 import '../usuarios_roles/gestion_roles/GestionRolesList.dart';
 import '../usuarios_roles/gestion_usuarios/usuarios_list.dart';
+import 'menu_screen.dart';
 
 class MenuDrawer extends StatelessWidget {
   const MenuDrawer({super.key});
@@ -54,57 +56,82 @@ class MenuDrawer extends StatelessWidget {
           ),
           child: CustomScrollView(
             slivers: [
+
+
               SliverToBoxAdapter(
-                child: Container(
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: const BorderRadius.only(bottomRight: Radius.circular(24)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 24, bottom: 24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: primaryColor.withOpacity(0.2),
-                            border: Border.all(
-                              color: primaryColor.withOpacity(0.5),
-                              width: 1.5,
+                child: FutureBuilder(
+                  future: Supabase.instance.client.rpc('obtener_datos_usuario', params: {
+                    'uid': userSession.uid,
+                  }),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox(height: 160); // altura fija para evitar salto
+                    } else if (snapshot.hasError || !snapshot.hasData) {
+                      return const Text("Error al cargar usuario");
+                    }
+
+                    final data = (snapshot.data as List).first;
+                    final nombre = data['nombre'];
+                    final apellido = data['apellido'];
+                    final rol = data['nombre_rol'];
+
+                    return Container(
+                      height: 160,
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.1),
+                        borderRadius: const BorderRadius.only(bottomRight: Radius.circular(24)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 24, bottom: 24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: primaryColor.withOpacity(0.2),
+                                    border: Border.all(
+                                      color: primaryColor.withOpacity(0.5),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Icon(Icons.person_outline, color: primaryColor, size: 24),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  '$nombre $apellido',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: onSurfaceColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          child: Icon(Icons.person_outline, color: primaryColor, size: 24),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Menú Principal',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: onSurfaceColor,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            Text(
+                              'Rol: $rol',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: onSurfaceColor.withOpacity(0.7),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Menú Principal',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: onSurfaceColor,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        Text(
-                          'Rol ID: $rolId',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: onSurfaceColor.withOpacity(0.6),
-                          ),
-                        ),
-                        Text(
-                          'Administración del sistema',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: onSurfaceColor.withOpacity(0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
 
@@ -112,6 +139,25 @@ class MenuDrawer extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 8),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
+                    SectionTitleWidget(title: 'Dashboard', color: primaryColor),
+                    MenuItemWidget(
+                      icon: Icons.dashboard,
+                      title: 'Ir al Dashboard',
+                      color: primaryColor,
+                      onTap: () {
+                        final user = Provider.of<UserSession>(context, listen: false);
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MenuScreen(
+                              uid: user.uid ?? '',
+                              rolId: user.rolId ?? 0,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
 
                     // GESTIÓN COMERCIAL
                     if (tienePermiso('Registro de Ventas') || tienePermiso('Detalle de Ventas') || tienePermiso('Clientes')) ...[

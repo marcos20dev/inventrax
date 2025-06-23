@@ -10,9 +10,6 @@ class DrawerRepository {
           .select('id_permisos, permisos (id_permisos, nombre, modulo)')
           .eq('rol_id', int.parse(rolId))
           .eq('estado', true);
-
-      print('🚀 Permisos cargados para rol $rolId: $res');
-
       final data = res as List;
 
       final permisos = <String, bool>{};
@@ -23,7 +20,6 @@ class DrawerRepository {
         }
       }
 
-      print("✅ Mapa de permisos finales: $permisos");
       return permisos;
     } catch (e) {
       print("❌ Error al cargar permisos: $e");

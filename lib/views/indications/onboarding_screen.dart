@@ -33,26 +33,24 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       'title': 'Bienvenido a Inventrax',
       'subtitle': 'La solución inteligente para tu inventario',
       'text':
-      'Optimiza la gestión de tu almacén con nuestra plataforma intuitiva y poderosa. Reduce tiempos de gestión en un 70% con nuestras herramientas especializadas.',
-      'color': Color(0xFFB0BEC5),
+      'Optimiza la gestión de tu almacén con nuestra plataforma intuitiva y poderosa. Reduce tiempos de gestión con nuestras herramientas especializadas.',
+      'color': Color(0xFFE6E7E8),
       'textColor': Color(0xFF263238),
       'features': [
         'Control de stock en tiempo real',
-        'Alertas automáticas de bajo inventario',
-        'Reportes personalizados'
+        'Alertas de bajo inventario',
       ],
     },
     {
       'image': 'assets/soportes.svg',
-      'title': 'Acceso Multinivel',
+      'title': 'Acceso Multirol',
       'subtitle': 'Diferentes roles, mismo poder',
       'text':
       'Administradores, supervisores y empleados tendrán acceso controlado según sus necesidades. Configura permisos granularmente para cada miembro de tu equipo.',
-      'color': Color(0xFFCFD8DC),
+      'color': Color(0xFFF4F4F4),
       'textColor': Color(0xFF37474F),
       'features': [
         'Perfiles personalizables',
-        'Soporte técnico prioritario',
         'Sincronización en la nube'
       ],
     },
@@ -62,12 +60,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       'subtitle': 'El futuro de la gestión de inventarios',
       'text':
       'Con Inventrax podrás tomar decisiones basadas en datos precisos y actualizados. Nuestra tecnología predictiva te ayuda a anticipar demandas y optimizar compras.',
-      'color': Color(0xFFECEFF1),
+      'color': Color(0xFFFFFFFF),
       'textColor': Color(0xFF455A64),
       'features': [
-        'Analítica avanzada',
-        'Integración con otros sistemas',
-        'Backup automático diario'
+        'Acceso desde cualquier dispositivo',
+        'Compatible con cualquier dispositivo',
+        'Interfaz amigable para todo el equipo',
+
       ],
     },
   ];

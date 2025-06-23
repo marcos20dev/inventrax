@@ -39,10 +39,6 @@ class DashboardRepository {
     try {
       final response = await supabaseClient.rpc('rpc_stock_critico');
 
-      // Mostrar en consola lo que devuelve Supabase
-      print("📦 Productos críticos desde Supabase:");
-      print(response);
-
       return List<Map<String, dynamic>>.from(response);
     } catch (error) {
       print("❌ Error al obtener productos críticos: $error");
@@ -54,8 +50,6 @@ class DashboardRepository {
     try {
       final response = await supabaseClient.rpc('rpc_clientes_top_compradores');
 
-      print("👑 Clientes top compradores: $response");
-
       return List<Map<String, dynamic>>.from(response);
     } catch (error) {
       print("❌ Error al obtener clientes top compradores: $error");
@@ -66,8 +60,6 @@ class DashboardRepository {
   Future<List<Map<String, dynamic>>> getProductosMasVendidos() async {
     try {
       final response = await supabaseClient.rpc('productos_mas_vendidos');
-
-      print("🔥 Productos más vendidos: $response");
 
       return List<Map<String, dynamic>>.from(response);
     } catch (error) {
