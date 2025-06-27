@@ -10,18 +10,24 @@ class ProductoRepository {
 
   Future<List<Map<String, dynamic>>> getAllProductos() async {
     try {
-      final response = await _supabase.rpc('get_all_productos');
+      final response = await _supabase.rpc('get_all_productos_v2');
 
-      // Verifica si la respuesta contiene datos
       if (response != null && response is List) {
-        return response.map((item) => Map<String, dynamic>.from(item)).toList();
+        return response.map((item) {
+          return Map<String, dynamic>.from(item)
+            ..['codigo_barras'] = item['codigo_barras'] ?? 'Sin código';  // Asegúrate de manejar bien 'codigo_barras'
+        }).toList();
       } else {
         throw Exception('No se encontraron productos');
       }
     } catch (e) {
-      throw Exception('Error al obtener todos los productos');
+      print('Error al obtener productos desde el repo: $e');
+      throw Exception('Error al obtener todos los productos: $e');
     }
   }
+
+
+
 
 
 

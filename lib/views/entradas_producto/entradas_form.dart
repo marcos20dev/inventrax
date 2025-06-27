@@ -23,7 +23,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
   List<Map<String, dynamic>> productos = [];
   List<Map<String, dynamic>> productosFiltrados = [];
-  final ProductoRepository _productoRepository = ProductoRepository();  // Añadir el repositorio aquí
+  final ProductoRepository _productoRepository =
+      ProductoRepository(); // Añadir el repositorio aquí
 
   // Variables para búsqueda y filtros
   String _tipoBusqueda = 'Producto';
@@ -32,7 +33,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
   final TextEditingController _busquedaController = TextEditingController();
 
   // Variables para el refresh
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
   bool _isRefreshing = false;
 
   final productosRepo = ProductoRepository(); // O como lo estés inyectando
@@ -48,7 +50,6 @@ class _InventarioScreenState extends State<InventarioScreen> {
       print('Error al obtener productos desde el repo: $e');
     }
   }
-
 
   Future<void> _handleRefresh() async {
     setState(() {
@@ -98,7 +99,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
       case 'STOCK MEDIO':
         resultados = resultados.where((p) {
           int stock = int.parse(p["stock_actual"].toString());
-          int stockInicial = int.tryParse(p["cantidad_inicial"]?.toString() ?? '') ?? 1;
+          int stockInicial =
+              int.tryParse(p["cantidad_inicial"]?.toString() ?? '') ?? 1;
           double porcentaje = (stock / stockInicial) * 100;
           return porcentaje >= 20 && porcentaje < 50;
         }).toList();
@@ -106,7 +108,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
       case 'STOCK ALTO':
         resultados = resultados.where((p) {
           int stock = int.parse(p["stock_actual"].toString());
-          int stockInicial = int.tryParse(p["cantidad_inicial"]?.toString() ?? '') ?? 1;
+          int stockInicial =
+              int.tryParse(p["cantidad_inicial"]?.toString() ?? '') ?? 1;
           double porcentaje = (stock / stockInicial) * 100;
           return porcentaje >= 50;
         }).toList();
@@ -120,7 +123,6 @@ class _InventarioScreenState extends State<InventarioScreen> {
       productosFiltrados = resultados;
     });
   }
-
 
   Future<bool?> _showDeleteConfirmationDialog(BuildContext context) async {
     return await showDialog<bool>(
@@ -178,9 +180,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: isDarkMode
-                            ? Colors.grey[400]
-                            : Colors.grey[600],
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                         height: 1.4,
                       ),
                     ),
@@ -275,7 +275,6 @@ class _InventarioScreenState extends State<InventarioScreen> {
     );
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -294,408 +293,608 @@ class _InventarioScreenState extends State<InventarioScreen> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: productos.isEmpty
-            ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(primaryColor)))
+            ? Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                ),
+              )
             : RefreshIndicator(
-          key: _refreshIndicatorKey,
-          onRefresh: _handleRefresh,
-          displacement: 40,
-          color: primaryColor,
-          backgroundColor: isDarkMode ? Colors.grey[800] : Colors.white,
-          strokeWidth: 3,
-          child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                // Improved search bar
-                Container(
-                  margin: EdgeInsets.only(top: 16, bottom: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
+                key: _refreshIndicatorKey,
+                onRefresh: _handleRefresh,
+                displacement: 40,
+                color: primaryColor,
+                backgroundColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                strokeWidth: 3,
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Column(
                     children: [
+                      // Improved search bar
                       Container(
+                        margin: EdgeInsets.only(top: 16, bottom: 12),
                         decoration: BoxDecoration(
-                          color: Color(0xFFFDFDFD),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            bottomLeft: Radius.circular(12),
-                          ),
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        height: 48,
-                        child: DropdownButton<String>(
-                          value: _tipoBusqueda,
-                          items: ['Producto', 'Proveedor', 'Categoría'].map(
-                                (String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              );
-                            },
-                          ).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _tipoBusqueda = newValue!;
-                              _aplicarFiltros();
-                            });
-                          },
-                          underline: Container(),
-                          icon: Icon(Icons.arrow_drop_down, color: Colors.black),
-                          dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: isDarkMode ? Colors.grey[800] : Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(12),
-                              bottomRight: Radius.circular(12),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
                             ),
-                          ),
-                          child: TextField(
-                            controller: _busquedaController,
-                            decoration: InputDecoration(
-                              hintText: 'Buscar...',
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),  // Adjust padding to center vertically
-                              suffixIcon: _terminoBusqueda.isNotEmpty
-                                  ? IconButton(
-                                icon: Icon(Icons.clear, size: 20),
-                                onPressed: () {
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFFFDFDFD),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  bottomLeft: Radius.circular(12),
+                                ),
+                              ),
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              height: 48,
+                              child: DropdownButton<String>(
+                                value: _tipoBusqueda,
+                                items: ['Producto', 'Proveedor', 'Categoría']
+                                    .map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      );
+                                    })
+                                    .toList(),
+                                onChanged: (String? newValue) {
                                   setState(() {
-                                    _terminoBusqueda = '';
-                                    _busquedaController.clear();
+                                    _tipoBusqueda = newValue!;
                                     _aplicarFiltros();
                                   });
                                 },
-                              )
-                                  : Icon(Icons.search, size: 20),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                _terminoBusqueda = value;
-                                _aplicarFiltros();
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Improved filter chips
-                Container(
-                  height: 48,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      SizedBox(width: 8),
-                      _buildFilterChip('TODO', _filtroStock == 'TODO'),
-                      _buildFilterChip('STOCK BAJO', _filtroStock == 'STOCK BAJO'),
-                      _buildFilterChip('STOCK MEDIO', _filtroStock == 'STOCK MEDIO'),
-                      _buildFilterChip('STOCK ALTO', _filtroStock == 'STOCK ALTO'),
-                      SizedBox(width: 8),
-                    ],
-                  ),
-                ),
-
-                // Stats cards
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          Icons.inventory_2,
-                          productosFiltrados.length.toString(),
-                          "Productos",
-                          primaryColor,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard(
-                          Icons.warning,
-                          productosFiltrados
-                              .where((p) => int.parse(p["stock_actual"].toString()) < 5)
-                              .length
-                              .toString(),
-                          "Bajo Stock",
-                          Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Product list
-                _isRefreshing
-                    ? Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(primaryColor)),
-                )
-                    : // Modificación en el ListView:
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: productosFiltrados.length,
-                  separatorBuilder: (context, index) => Divider(height: 20),
-                  itemBuilder: (context, index) {
-                    final producto = productosFiltrados[index];
-                    final stockActual = int.parse(producto["stock_actual"].toString());
-                    final stockInicial = int.tryParse(producto["cantidad_inicial"]?.toString() ?? '') ?? 1;
-                    final porcentajeStock = (stockActual / stockInicial) * 100;
-
-                    return Container(
-                      margin: EdgeInsets.symmetric(vertical: 4),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {},
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      producto["nombre_producto"],
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: primaryColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      producto["nombre_categoria"],
-                                      style: TextStyle(
-                                        color: primaryColor,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                underline: Container(),
+                                icon: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.black,
+                                ),
+                                dropdownColor: isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.white,
                               ),
-                              SizedBox(height: 8),
-                              Text(
-                                "Proveedor: ${producto["nombre_proveedor"]}",
-                                style: TextStyle(
+                            ),
+                            Expanded(
+                              child: Container(
+                                height: 48,
+                                decoration: BoxDecoration(
                                   color: isDarkMode
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600],
-                                  fontSize: 13,
+                                      ? Colors.grey[800]
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: _busquedaController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Buscar...',
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ), // Adjust padding to center vertically
+                                    suffixIcon: _terminoBusqueda.isNotEmpty
+                                        ? IconButton(
+                                            icon: Icon(Icons.clear, size: 20),
+                                            onPressed: () {
+                                              setState(() {
+                                                _terminoBusqueda = '';
+                                                _busquedaController.clear();
+                                                _aplicarFiltros();
+                                              });
+                                            },
+                                          )
+                                        : Icon(Icons.search, size: 20),
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _terminoBusqueda = value;
+                                      _aplicarFiltros();
+                                    });
+                                  },
                                 ),
                               ),
-                              SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Stock",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[500],
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          "$stockActual/$stockInicial",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Compra",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[500],
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          "S/${producto["precio_compra"].toString()}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Venta",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[500],
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          "S/${producto["precio_venta"].toString()}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.green[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(4),
-                                      child: LinearProgressIndicator(
-                                        value: porcentajeStock / 100,
-                                        backgroundColor: isDarkMode
-                                            ? Colors.grey[800]!
-                                            : Colors.grey[200]!,
-                                        color: _getStockColor(porcentajeStock),
-                                        minHeight: 8,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    "${porcentajeStock.toStringAsFixed(0)}%",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: _getStockColor(porcentajeStock),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  // Agregar el icono para mostrar la descripción
-                                  IconButton(
-                                    icon: Icon(Icons.edit_attributes, size: 20),
-                                    color: primaryColor,
-                                    onPressed: () async {
-                                      // Obtener la descripción del producto
-                                      final productoRepo = ProductoRepository();
-                                      final productoDetails = await productoRepo.getProductoPorId(producto["id_producto"]);
-
-                                      if (productoDetails != null) {
-                                        _showDescriptionDialog(context, productoDetails);
-                                      }
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete, size: 20),
-                                    color: Colors.red[400],
-                                    onPressed: () async {
-                                      final productoId = producto['id_producto'].toString(); // Convertir a String
-                                      print("Producto ID: $productoId");
-
-                                      final bool? confirmed = await _showDeleteConfirmationDialog(context);
-                                      if (confirmed == true) {
-                                        final success = await _productoRepository.eliminarProducto(productoId);
-
-                                        if (success) {
-                                          // Eliminar localmente de la lista
-                                          setState(() {
-                                            productosFiltrados.removeWhere((p) => p['id_producto'].toString() == productoId);
-                                          });
-
-                                          // Usar el NotificationToast para mostrar el mensaje de éxito
-                                          showNotificationToast(
-                                            context,
-                                            message: "Producto eliminado correctamente",
-                                            type: NotificationType.success,
-                                          );
-                                        } else {
-                                          // Usar el NotificationToast para mostrar el mensaje de error
-                                          showNotificationToast(
-                                            context,
-                                            message: "No se pudo eliminar el producto",
-                                            type: NotificationType.error,
-                                          );
-                                        }
-                                      }
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.add, size: 20),
-                                    color: primaryColor,
-                                    onPressed: () => _mostrarDialogoAgregarStock(
-                                      context,
-                                      producto,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
-                )
 
-// Función para mostrar el diálogo con la descripción y el campo para editar
+                      // Improved filter chips
+                      Container(
+                        height: 48,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            SizedBox(width: 8),
+                            _buildFilterChip('TODO', _filtroStock == 'TODO'),
+                            _buildFilterChip(
+                              'STOCK BAJO',
+                              _filtroStock == 'STOCK BAJO',
+                            ),
+                            _buildFilterChip(
+                              'STOCK MEDIO',
+                              _filtroStock == 'STOCK MEDIO',
+                            ),
+                            _buildFilterChip(
+                              'STOCK ALTO',
+                              _filtroStock == 'STOCK ALTO',
+                            ),
+                            SizedBox(width: 8),
+                          ],
+                        ),
+                      ),
 
-        ],
-            ),
-          ),
-        ),
+                      // Stats cards
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                Icons.inventory_2,
+                                productosFiltrados.length.toString(),
+                                "Productos",
+                                primaryColor,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatCard(
+                                Icons.warning,
+                                productosFiltrados
+                                    .where(
+                                      (p) =>
+                                          int.parse(
+                                            p["stock_actual"].toString(),
+                                          ) <
+                                          5,
+                                    )
+                                    .length
+                                    .toString(),
+                                "Bajo Stock",
+                                Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Product list
+                      _isRefreshing
+                          ? Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  primaryColor,
+                                ),
+                              ),
+                            )
+                          : // Modificación en el ListView:
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: productosFiltrados.length,
+                        separatorBuilder: (context, index) => Divider(height: 20),
+                        itemBuilder: (context, index) {
+                          final producto = productosFiltrados[index];
+                          final stockActual = int.parse(producto["stock_actual"].toString());
+                          final stockInicial = int.tryParse(producto["cantidad_inicial"]?.toString() ?? '') ?? 1;
+                          final porcentajeStock = (stockActual / stockInicial) * 100;
+                          final codigoBarras = producto["codigo_barras"]?.toString() ?? 'Sin código';
+
+                          return Container(
+                            margin: EdgeInsets.symmetric(vertical: 4),
+                            decoration: BoxDecoration(
+                              color: cardColor,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () {},
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Encabezado con nombre y categoría
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              producto["nombre_producto"],
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                                height: 1.3,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color: primaryColor.withOpacity(0.08),
+                                              borderRadius: BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color: primaryColor.withOpacity(0.2),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              producto["nombre_categoria"],
+                                              style: TextStyle(
+                                                color: primaryColor,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+
+                                      // Código de barras mejorado
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              decoration: BoxDecoration(
+                                                color: isDarkMode ? Colors.grey[800]!.withOpacity(0.3) : Colors.grey[100],
+                                                borderRadius: BorderRadius.circular(10),
+                                                // Cambié el color del borde para que coincida con el color del contenido
+                                                border: Border.all(
+                                                  color: Color(0xfff3f3f3)
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.barcode_reader, size: 18,
+                                                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                                                  SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Text(
+                                                      codigoBarras,
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w500,
+                                                        color: isDarkMode ? Colors.grey[300] : Colors.grey[800],
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          InkWell(
+                                            borderRadius: BorderRadius.circular(20),
+                                            onTap: () {
+                                              Clipboard.setData(ClipboardData(text: codigoBarras));
+
+                                              // Aquí he cambiado el SnackBar por tu notificación personalizada:
+                                              showNotificationToast(
+                                                context,
+                                                message: 'Código copiado',
+                                                type: NotificationType.success, // Puedes elegir el tipo de notificación
+                                              );
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: primaryColor.withOpacity(0.1),
+                                                shape: BoxShape.circle,
+                                                // Eliminé el borde oscuro para que se vea más suave
+                                              ),
+                                              child: Icon(Icons.copy, size: 18, color: primaryColor),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+
+                                      // Proveedor con icono
+                                      Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          color: isDarkMode ? Colors.grey[800]!.withOpacity(0.3) : Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.local_shipping, size: 16,
+                                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "Proveedor: ${producto["nombre_proveedor"]}",
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+
+                                      // Datos de stock y precios en cajas
+                                      Row(
+                                        children: [
+                                          // Stock
+                                          Expanded(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: isDarkMode ? Colors.grey[800]!.withOpacity(0.3) : Colors.grey[50],
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(
+                                                    color: Color(0xfff8f8f8)
+                                                ),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.inventory_2, size: 14,
+                                                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        "Stock",
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    "$stockActual/$stockInicial",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+
+                                          // Precio Compra
+                                          Expanded(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: isDarkMode ? Colors.grey[800]!.withOpacity(0.3) : Colors.grey[50],
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(
+                                                    color: Color(0xfff8f8f8)
+                                                ),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.shopping_bag, size: 14,
+                                                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        "Compra",
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    "S/${producto["precio_compra"].toString()}",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+
+                                          // Precio Venta
+                                          Expanded(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: isDarkMode ? Colors.grey[800]!.withOpacity(0.3) : Colors.grey[50],
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(
+                                                    color: Color(0xfff8f8f8)
+                                                ),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.sell, size: 14,
+                                                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        "Venta",
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    "S/${producto["precio_venta"].toString()}",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.green[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 16),
+
+                                      // Barra de progreso y botones de acción
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 3,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  child: LinearProgressIndicator(
+                                                    value: porcentajeStock / 100,
+                                                    backgroundColor: isDarkMode ? Colors.grey[800]! : Colors.grey[200]!,
+                                                    color: _getStockColor(porcentajeStock),
+                                                    minHeight: 8,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 6),
+                                                Text(
+                                                  "Stock: ${porcentajeStock.toStringAsFixed(0)}%",
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: _getStockColor(porcentajeStock),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          // Botón Editar
+                                          InkWell(
+                                            borderRadius: BorderRadius.circular(20),
+                                            onTap: () async {
+                                              final productoRepo = ProductoRepository();
+                                              final productoDetails = await productoRepo.getProductoPorId(
+                                                producto["id_producto"],
+                                              );
+                                              if (productoDetails != null) {
+                                                _showDescriptionDialog(context, productoDetails);
+                                              }
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: primaryColor.withOpacity(0.1),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(Icons.edit_attributes, size: 20, color: primaryColor),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          // Botón Eliminar
+                                          InkWell(
+                                            borderRadius: BorderRadius.circular(20),
+                                            onTap: () async {
+                                              final productoId = producto['id_producto'].toString();
+                                              final bool? confirmed = await _showDeleteConfirmationDialog(context);
+                                              if (confirmed == true) {
+                                                final success = await _productoRepository.eliminarProducto(productoId);
+                                                if (success) {
+                                                  setState(() {
+                                                    productosFiltrados.removeWhere(
+                                                          (p) => p['id_producto'].toString() == productoId,
+                                                    );
+                                                  });
+                                                  showNotificationToast(
+                                                    context,
+                                                    message: "Producto eliminado correctamente",
+                                                    type: NotificationType.success,
+                                                  );
+                                                } else {
+                                                  showNotificationToast(
+                                                    context,
+                                                    message: "No se pudo eliminar el producto",
+                                                    type: NotificationType.error,
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red[400]!.withOpacity(0.1),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(Icons.delete, size: 20, color: Colors.red[400]),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          // Botón Agregar
+                                          InkWell(
+                                            borderRadius: BorderRadius.circular(20),
+                                            onTap: () => _mostrarDialogoAgregarStock(context, producto),
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: primaryColor.withOpacity(0.1),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(Icons.add, size: 20, color: primaryColor),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      // Función para mostrar el diálogo con la descripción y el campo para editar
+                    ],
+                  ),
+                ),
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -707,17 +906,16 @@ class _InventarioScreenState extends State<InventarioScreen> {
         child: Icon(Icons.add, color: Colors.white),
         elevation: 4,
         backgroundColor: primaryColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
 
   // Función para mostrar el diálogo con la descripción y el campo para editar
   void _showDescriptionDialog(BuildContext context, Producto producto) {
-    final TextEditingController _descripcionController =
-    TextEditingController(text: producto.descripcion ?? '');
+    final TextEditingController _descripcionController = TextEditingController(
+      text: producto.descripcion ?? '',
+    );
     final primaryColor = Colors.teal.shade400;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -748,8 +946,11 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           color: primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.description_rounded,
-                            color: primaryColor, size: 28),
+                        child: Icon(
+                          Icons.description_rounded,
+                          color: primaryColor,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Text(
@@ -783,7 +984,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      producto.descripcion != null && producto.descripcion!.isNotEmpty
+                      producto.descripcion != null &&
+                              producto.descripcion!.isNotEmpty
                           ? producto.descripcion!
                           : "No hay descripción disponible.",
                       style: TextStyle(
@@ -808,7 +1010,9 @@ class _InventarioScreenState extends State<InventarioScreen> {
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                       ),
                       filled: true,
-                      fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+                      fillColor: isDarkMode
+                          ? Colors.grey[800]
+                          : Colors.grey[100],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -832,7 +1036,9 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             side: BorderSide(
-                              color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+                              color: isDarkMode
+                                  ? Colors.grey[700]!
+                                  : Colors.grey[300]!,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -841,7 +1047,9 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           child: Text(
                             "CANCELAR",
                             style: TextStyle(
-                              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                              color: isDarkMode
+                                  ? Colors.grey[300]
+                                  : Colors.grey[700],
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -865,7 +1073,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
 
                               showNotificationToast(
                                 context,
-                                message: "Descripción actualizada correctamente",
+                                message:
+                                    "Descripción actualizada correctamente",
                                 type: NotificationType.success,
                               );
                             } catch (e) {
@@ -927,14 +1136,17 @@ class _InventarioScreenState extends State<InventarioScreen> {
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? Colors.grey[800]
             : Colors.grey[200],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
 
-  Widget _buildStatCard(IconData icon, String value, String label, Color color) {
+  Widget _buildStatCard(
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -966,17 +1178,11 @@ class _InventarioScreenState extends State<InventarioScreen> {
             children: [
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
           ),
@@ -985,8 +1191,10 @@ class _InventarioScreenState extends State<InventarioScreen> {
     );
   }
 
-
-  void _mostrarDialogoAgregarStock(BuildContext context, Map<String, dynamic> producto) {
+  void _mostrarDialogoAgregarStock(
+    BuildContext context,
+    Map<String, dynamic> producto,
+  ) {
     final TextEditingController cantidadController = TextEditingController();
     final primaryColor = Colors.teal.shade400;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -1018,8 +1226,11 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           color: primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.inventory_rounded,
-                            color: primaryColor, size: 28),
+                        child: Icon(
+                          Icons.inventory_rounded,
+                          color: primaryColor,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Text(
@@ -1058,7 +1269,9 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           text: TextSpan(
                             style: TextStyle(
                               fontSize: 14,
-                              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                             ),
                             children: [
                               const TextSpan(text: "Stock actual: "),
@@ -1091,15 +1304,21 @@ class _InventarioScreenState extends State<InventarioScreen> {
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                       ),
                       filled: true,
-                      fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+                      fillColor: isDarkMode
+                          ? Colors.grey[800]
+                          : Colors.grey[100],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 18),
-                      suffixIcon: Icon(Icons.exposure_plus_1_rounded,
-                          color: primaryColor),
+                        horizontal: 16,
+                        vertical: 18,
+                      ),
+                      suffixIcon: Icon(
+                        Icons.exposure_plus_1_rounded,
+                        color: primaryColor,
+                      ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: primaryColor, width: 2),
@@ -1118,7 +1337,9 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             side: BorderSide(
-                              color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+                              color: isDarkMode
+                                  ? Colors.grey[700]!
+                                  : Colors.grey[300]!,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -1127,7 +1348,9 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           child: Text(
                             "CANCELAR",
                             style: TextStyle(
-                              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                              color: isDarkMode
+                                  ? Colors.grey[300]
+                                  : Colors.grey[700],
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -1139,67 +1362,101 @@ class _InventarioScreenState extends State<InventarioScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            final cantidad = int.tryParse(cantidadController.text) ?? 0;
+                            final cantidad =
+                                int.tryParse(cantidadController.text) ?? 0;
 
                             print("🔢 Cantidad ingresada: $cantidad");
                             print("📦 Producto recibido: $producto");
-                            print("🆔 ID del producto: ${producto['id_producto']}"); // Revisa el valor exacto
+                            print(
+                              "🆔 ID del producto: ${producto['id_producto']}",
+                            ); // Revisa el valor exacto
 
                             if (cantidad > 0) {
                               final idProductoRaw = producto['id_producto'];
 
                               print("🆔 ID bruto del producto: $idProductoRaw");
 
-                              if (idProductoRaw == null || idProductoRaw.toString().isEmpty) {
-                                print("❌ Producto sin ID válido (null o vacío)");
+                              if (idProductoRaw == null ||
+                                  idProductoRaw.toString().isEmpty) {
+                                print(
+                                  "❌ Producto sin ID válido (null o vacío)",
+                                );
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("❌ Error: Producto sin ID válido")),
+                                  const SnackBar(
+                                    content: Text(
+                                      "❌ Error: Producto sin ID válido",
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
 
-                              final int? idProducto = int.tryParse(idProductoRaw.toString());
+                              final int? idProducto = int.tryParse(
+                                idProductoRaw.toString(),
+                              );
 
                               if (idProducto == null || idProducto <= 0) {
-                                print("❌ ID de producto no válido después del parseo: $idProducto");
+                                print(
+                                  "❌ ID de producto no válido después del parseo: $idProducto",
+                                );
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("❌ Error: ID de producto no válido")),
+                                  const SnackBar(
+                                    content: Text(
+                                      "❌ Error: ID de producto no válido",
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
 
-                              final int idProveedor = 1; // ← Cambiar cuando tengas proveedor dinámico
+                              final int idProveedor =
+                                  1; // ← Cambiar cuando tengas proveedor dinámico
                               final precioVentaRaw = producto['precio_venta'];
 
-                              print("💰 Precio de venta (raw): $precioVentaRaw");
+                              print(
+                                "💰 Precio de venta (raw): $precioVentaRaw",
+                              );
 
                               final double precioCompra =
-                                  double.tryParse(precioVentaRaw?.toString() ?? '') ?? 0;
+                                  double.tryParse(
+                                    precioVentaRaw?.toString() ?? '',
+                                  ) ??
+                                  0;
 
                               final String? idUsuario =
-                                  Provider.of<UserSession>(context, listen: false).uid;
+                                  Provider.of<UserSession>(
+                                    context,
+                                    listen: false,
+                                  ).uid;
 
                               print("👤 ID del usuario actual: $idUsuario");
 
                               if (idUsuario == null) {
                                 print("⚠️ Usuario no autenticado");
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("⚠️ Usuario no autenticado")),
+                                  const SnackBar(
+                                    content: Text("⚠️ Usuario no autenticado"),
+                                  ),
                                 );
                                 return;
                               }
 
                               try {
-                                print("🚀 Enviando datos a aumentarStockProducto...");
-                                print("📤 Datos enviados → ID producto: $idProducto, Cantidad: $cantidad, ID proveedor: $idProveedor, Precio compra: $precioCompra, ID usuario: $idUsuario");
-
-                                await ProductoRepository().aumentarStockProducto(
-                                  idProducto: idProducto,
-                                  cantidad: cantidad,
-                                  idProveedor: idProveedor,
-                                  precioCompra: precioCompra,
-                                  idUsuario: idUsuario,
+                                print(
+                                  "🚀 Enviando datos a aumentarStockProducto...",
                                 );
+                                print(
+                                  "📤 Datos enviados → ID producto: $idProducto, Cantidad: $cantidad, ID proveedor: $idProveedor, Precio compra: $precioCompra, ID usuario: $idUsuario",
+                                );
+
+                                await ProductoRepository()
+                                    .aumentarStockProducto(
+                                      idProducto: idProducto,
+                                      cantidad: cantidad,
+                                      idProveedor: idProveedor,
+                                      precioCompra: precioCompra,
+                                      idUsuario: idUsuario,
+                                    );
 
                                 print("✅ Stock actualizado exitosamente");
                                 Navigator.pop(context);
@@ -1207,7 +1464,11 @@ class _InventarioScreenState extends State<InventarioScreen> {
                               } catch (e) {
                                 print("❌ Error al actualizar stock: $e");
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("❌ Error al actualizar stock")),
+                                  const SnackBar(
+                                    content: Text(
+                                      "❌ Error al actualizar stock",
+                                    ),
+                                  ),
                                 );
                               }
                             } else {
@@ -1244,8 +1505,6 @@ class _InventarioScreenState extends State<InventarioScreen> {
     );
   }
 
-
-
   void _mostrarSnackbarConfirmacion(BuildContext context, int cantidad) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1255,17 +1514,13 @@ class _InventarioScreenState extends State<InventarioScreen> {
         ),
         backgroundColor: Colors.green.shade800,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         elevation: 0,
         duration: const Duration(seconds: 2),
       ),
     );
   }
-
-
 
   Color _getStockColor(double porcentaje) {
     if (porcentaje < 20) return Colors.red[600]!;
