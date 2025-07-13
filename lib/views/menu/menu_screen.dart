@@ -122,6 +122,7 @@ class _MenuScreenState extends State<MenuScreen> {
           final dashboardData = viewModel.dashboardData;
           final productosAgotandose = viewModel.productosCriticos;
           final ingresos = dashboardData['ingresos'] ?? "0";
+          final ingresosFormateados = double.tryParse(ingresos.toString())?.toStringAsFixed(2) ?? '0.00';
           final ventas = dashboardData['ventas'] ?? "0";
           final clientes = dashboardData['clientes'] ?? "0";
 
@@ -156,7 +157,7 @@ class _MenuScreenState extends State<MenuScreen> {
                           Row(
                             children: [
                               Text(
-                                "S/",
+                                "S/ ",
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
@@ -165,9 +166,10 @@ class _MenuScreenState extends State<MenuScreen> {
                               ),
                             ],
                           ),
-                          "S/ $ingresos",
+                          "S/ $ingresosFormateados", // Usar ingresos formateados aquí
                           "Ingresos",
                         ),
+
                         _buildSummaryItem(Icons.shopping_cart, ventas, "Ventas"),
                         _buildSummaryItem(Icons.people_alt, clientes, "Clientes"),
                       ],

@@ -66,7 +66,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         'Acceso desde cualquier dispositivo',
         'Compatible con cualquier dispositivo',
         'Interfaz amigable para todo el equipo',
-
       ],
     },
   ];
@@ -138,6 +137,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.height < 600;
+    final isTablet = size.width > 600;
 
     return Scaffold(
       backgroundColor: _pages[_currentIndex]['color'],
@@ -156,7 +157,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               children: [
                 // Header con botón de cerrar
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(isSmallScreen ? 8.0 : 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -166,7 +167,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
-                          icon: Icon(Icons.close, size: 24),
+                          icon: Icon(Icons.close, size: isSmallScreen ? 20 : 24),
                           color: _pages[_currentIndex]['textColor'],
                           onPressed: () => _close(),
                         ),
@@ -187,165 +188,207 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     },
                     itemBuilder: (context, index) {
                       final page = _pages[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Imagen con animación
-                            _animateElements
-                                ? SvgPicture.asset(
-                              page['image']!,
-                              height: size.height * 0.25,
-                              fit: BoxFit.contain,
-
-                            )
-                                .animate()
-                                .fadeIn(duration: 300.ms)
-                                .then()
-                                .shake(duration: 600.ms, hz: 2)
-                                : SvgPicture.asset(
-                              page['image']!,
-                              height: size.height * 0.25,
-                              fit: BoxFit.contain,
-
+                      return SingleChildScrollView(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSmallScreen ? 20 : 32,
+                            vertical: isSmallScreen ? 10 : 0,
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: size.height - (isSmallScreen ? 150 : 200),
                             ),
-
-                            const SizedBox(height: 40),
-
-                            // Título principal
-                            _animateElements
-                                ? Column(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  page['title'],
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.headlineMedium?.copyWith(
-                                    color: page['textColor'],
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 28,
-                                  ),
+                                // Imagen con animación
+                                _animateElements
+                                    ? SvgPicture.asset(
+                                  page['image']!,
+                                  height: isTablet
+                                      ? size.height * 0.35
+                                      : isSmallScreen
+                                      ? size.height * 0.2
+                                      : size.height * 0.25,
+                                  fit: BoxFit.contain,
                                 )
                                     .animate()
                                     .fadeIn(duration: 300.ms)
-                                    .slideY(begin: 0.2, end: 0),
-                                const SizedBox(height: 8),
-                                Text(
-                                  page['subtitle'],
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: page['textColor'].withOpacity(0.8),
-                                    fontWeight: FontWeight.w500,
+                                    .then()
+                                    .shake(duration: 600.ms, hz: 2)
+                                    : SvgPicture.asset(
+                                  page['image']!,
+                                  height: isTablet
+                                      ? size.height * 0.35
+                                      : isSmallScreen
+                                      ? size.height * 0.2
+                                      : size.height * 0.25,
+                                  fit: BoxFit.contain,
+                                ),
+
+                                SizedBox(height: isSmallScreen ? 20 : 40),
+
+                                // Título principal
+                                _animateElements
+                                    ? Column(
+                                  children: [
+                                    Text(
+                                      page['title'],
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.headlineMedium?.copyWith(
+                                        color: page['textColor'],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: isSmallScreen ? 22 : 28,
+                                      ),
+                                    )
+                                        .animate()
+                                        .fadeIn(duration: 300.ms)
+                                        .slideY(begin: 0.2, end: 0),
+                                    SizedBox(height: isSmallScreen ? 4 : 8),
+                                    Text(
+                                      page['subtitle'],
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        color: page['textColor'].withOpacity(0.8),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: isSmallScreen ? 14 : null,
+                                      ),
+                                    )
+                                        .animate()
+                                        .fadeIn(duration: 400.ms)
+                                        .slideY(begin: 0.2, end: 0),
+                                  ],
+                                )
+                                    : Column(
+                                  children: [
+                                    Text(
+                                      page['title'],
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.headlineMedium?.copyWith(
+                                        color: page['textColor'],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: isSmallScreen ? 22 : 28,
+                                      ),
+                                    ),
+                                    SizedBox(height: isSmallScreen ? 4 : 8),
+                                    Text(
+                                      page['subtitle'],
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        color: page['textColor'].withOpacity(0.8),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: isSmallScreen ? 14 : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: isSmallScreen ? 12 : 24),
+
+                                // Texto descriptivo
+                                _animateElements
+                                    ? Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isSmallScreen ? 8 : 0,
                                   ),
+                                  child: Text(
+                                    page['text'],
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: page['textColor'].withOpacity(0.9),
+                                      height: 1.6,
+                                      fontSize: isSmallScreen ? 14 : null,
+                                    ),
+                                  )
+                                      .animate()
+                                      .fadeIn(duration: 500.ms)
+                                      .slideY(begin: 0.3, end: 0),
+                                )
+                                    : Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isSmallScreen ? 8 : 0,
+                                  ),
+                                  child: Text(
+                                    page['text'],
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: page['textColor'].withOpacity(0.9),
+                                      height: 1.6,
+                                      fontSize: isSmallScreen ? 14 : null,
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(height: isSmallScreen ? 12 : 24),
+
+                                // Lista de características
+                                _animateElements
+                                    ? Column(
+                                  children: [
+                                    ...page['features'].map<Widget>((feature) => Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: isSmallScreen ? 4 : 6,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle,
+                                            color: page['textColor'].withOpacity(0.8),
+                                            size: isSmallScreen ? 16 : 18,
+                                          ),
+                                          SizedBox(width: isSmallScreen ? 6 : 8),
+                                          Flexible(
+                                            child: Text(
+                                              feature,
+                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                                color: page['textColor'],
+                                                fontSize: isSmallScreen ? 13 : null,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ))
+                                  ],
                                 )
                                     .animate()
-                                    .fadeIn(duration: 400.ms)
-                                    .slideY(begin: 0.2, end: 0),
-                              ],
-                            )
-                                : Column(
-                              children: [
-                                Text(
-                                  page['title'],
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.headlineMedium?.copyWith(
-                                    color: page['textColor'],
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 28,
-                                  ),
+                                    .fadeIn(duration: 600.ms)
+                                    .slideY(begin: 0.2, end: 0)
+                                    : Column(
+                                  children: [
+                                    ...page['features'].map<Widget>((feature) => Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: isSmallScreen ? 4 : 6,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle,
+                                            color: page['textColor'].withOpacity(0.8),
+                                            size: isSmallScreen ? 16 : 18,
+                                          ),
+                                          SizedBox(width: isSmallScreen ? 6 : 8),
+                                          Flexible(
+                                            child: Text(
+                                              feature,
+                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                                color: page['textColor'],
+                                                fontSize: isSmallScreen ? 13 : null,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ))
+                                  ],
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  page['subtitle'],
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: page['textColor'].withOpacity(0.8),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
                               ],
                             ),
-
-                            const SizedBox(height: 24),
-
-                            // Texto descriptivo
-                            _animateElements
-                                ? Text(
-                              page['text'],
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: page['textColor'].withOpacity(0.9),
-                                height: 1.6,
-                              ),
-                            )
-                                .animate()
-                                .fadeIn(duration: 500.ms)
-                                .slideY(begin: 0.3, end: 0)
-                                : Text(
-                              page['text'],
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: page['textColor'].withOpacity(0.9),
-                                height: 1.6,
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // Lista de características
-                            _animateElements
-                                ? Column(
-                              children: [
-                                ...page['features'].map<Widget>((feature) => Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle,
-                                        color: page['textColor'].withOpacity(0.8),
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        feature,
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          color: page['textColor'],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ))
-                              ],
-                            )
-                                .animate()
-                                .fadeIn(duration: 600.ms)
-                                .slideY(begin: 0.2, end: 0)
-                                : Column(
-                              children: [
-                                ...page['features'].map<Widget>((feature) => Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle,
-                                        color: page['textColor'].withOpacity(0.8),
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        feature,
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          color: page['textColor'],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ))
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       );
                     },
@@ -357,16 +400,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   children: [
                     // Indicador de página
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 10 : 20),
                       child: SmoothPageIndicator(
                         controller: _pageController,
                         count: _pages.length,
                         effect: ExpandingDotsEffect(
-                          dotWidth: 10,
-                          dotHeight: 10,
+                          dotWidth: isSmallScreen ? 8 : 10,
+                          dotHeight: isSmallScreen ? 8 : 10,
                           activeDotColor: _pages[_currentIndex]['textColor'],
                           dotColor: _pages[_currentIndex]['textColor'].withOpacity(0.3),
-                          spacing: 8,
+                          spacing: isSmallScreen ? 6 : 8,
                           expansionFactor: 3,
                         ),
                       ).animate().fadeIn(duration: 500.ms),
@@ -374,10 +417,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
                     // Botones de navegación
                     Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 40,
-                        left: 32,
-                        right: 32,
+                      padding: EdgeInsets.only(
+                        bottom: isSmallScreen ? 20 : 40,
+                        left: isSmallScreen ? 20 : 32,
+                        right: isSmallScreen ? 20 : 32,
                       ),
                       child: _animateElements
                           ? Row(
@@ -389,19 +432,25 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               onPressed: _goToPrevious,
                               style: TextButton.styleFrom(
                                 foregroundColor: _pages[_currentIndex]['textColor'],
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isSmallScreen ? 12 : 16,
+                                ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 children: [
-                                  Icon(Icons.chevron_left),
-                                  Text('Atrás'),
+                                  Icon(Icons.chevron_left,
+                                      size: isSmallScreen ? 18 : 24),
+                                  SizedBox(width: isSmallScreen ? 2 : 4),
+                                  Text('Atrás', style: TextStyle(
+                                      fontSize: isSmallScreen ? 13 : null
+                                  )),
                                 ],
                               ),
                             )
                                 .animate()
                                 .fadeIn()
                           else
-                            const SizedBox(width: 80),
+                            SizedBox(width: isSmallScreen ? 60 : 80),
 
                           // Botón principal
                           if (_currentIndex < _pages.length - 1)
@@ -410,9 +459,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _pages[_currentIndex]['textColor'],
                                 foregroundColor: _pages[_currentIndex]['color'],
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 14,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isSmallScreen ? 20 : 24,
+                                  vertical: isSmallScreen ? 10 : 14,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30),
@@ -421,9 +470,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 shadowColor: _pages[_currentIndex]['textColor']
                                     .withOpacity(0.3),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Continuar',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isSmallScreen ? 13 : null,
+                                ),
                               ),
                             )
                                 .animate()
@@ -435,9 +487,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _pages[_currentIndex]['textColor'],
                                 foregroundColor: _pages[_currentIndex]['color'],
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 14,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isSmallScreen ? 24 : 32,
+                                  vertical: isSmallScreen ? 10 : 14,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30),
@@ -446,9 +498,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 shadowColor: _pages[_currentIndex]['textColor']
                                     .withOpacity(0.3),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Empezar Ahora',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isSmallScreen ? 13 : null,
+                                ),
                               ),
                             )
                                 .animate()

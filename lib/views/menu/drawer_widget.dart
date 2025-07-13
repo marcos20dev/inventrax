@@ -8,6 +8,7 @@ import '../../widgets/widget_drawer/Custom_Expansion_Widget.dart';
 import '../../widgets/widget_drawer/MenuItemWidget.dart';
 import '../../widgets/widget_drawer/Section_Title_Widget.dart';
 
+import '../ventas/venta_lista_v2.dart';
 import '../ventas/ventas_form.dart';
 import '../ventas/ventas_list.dart';
 import '../clientes/clientes_list.dart';

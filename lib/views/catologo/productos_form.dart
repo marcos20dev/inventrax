@@ -101,7 +101,8 @@ class _ProductosFormScreenState extends State<ProductosFormScreen> {
       'id_proveedor': int.tryParse(_proveedorController.text.trim()) ?? 0,
       'cantidad': int.tryParse(_cantidadController.text.trim()) ?? 0,
       'fecha_entrada': DateTime.now().toIso8601String(),
-      'precio_compra': (double.tryParse(_precioCompraController.text.trim()) ?? 0.0).toInt(),
+      'precio_compra': double.tryParse(_precioCompraController.text.trim()) ?? 0.0,
+      //'precio_compra': (double.tryParse(_precioCompraController.text.trim()) ?? 0.0).toInt(),
     };
 
     final movimientoData = <String, dynamic>{

@@ -7,12 +7,12 @@ import '../../widgets/widget_texfield/venta_list_item.dart';
 import '../../widgets/widget_drawer/base_scaffold.dart';
 import '../../widgets/widget_notification/Notification_Toast.dart';
 
-class VentaListScreen extends StatefulWidget {
+class VentaListScreen_beta extends StatefulWidget {
   @override
-  _VentaListScreenState createState() => _VentaListScreenState();
+  _VentaListScreen_betaState createState() => _VentaListScreen_betaState();
 }
 
-class _VentaListScreenState extends State<VentaListScreen> {
+class _VentaListScreen_betaState extends State<VentaListScreen_beta> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();

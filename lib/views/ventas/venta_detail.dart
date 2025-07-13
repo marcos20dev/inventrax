@@ -182,7 +182,7 @@ class _VentaDetailScreenState extends State<VentaDetailScreen> {
                     child: Icon(Icons.shopping_cart, size: 30, color: primaryColor),
                   ),
                   SizedBox(height: 2),
-                  Text('TIENDA ',
+                  Text('Inversiones TECLUK ',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

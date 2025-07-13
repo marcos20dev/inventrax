@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:inventrax/repositories/categoria_repository.dart';
 import 'package:inventrax/repositories/cliente_repository.dart';
@@ -23,6 +25,15 @@ import 'repositories/venta_repository.dart';
 
 
 Future<void> main() async {
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    print("FlutterError: ${details.exception}");
+  };
+  runZonedGuarded(() {
+    runApp(MyApp());
+  }, (error, stackTrace) {
+    print("Zone error: $error");
+  });
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: 'https://putgmymnacszfvykckml.supabase.co',
@@ -107,12 +118,12 @@ class MyApp extends StatelessWidget {
       title: 'Inventrax',
       home:
       //LoginScreen()
-      MenuScreen(
-        uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9',
-         rolId: 9, // <-- Asegúrate de usar el ID real del rol del usuario
-        ),
+      //MenuScreen(
+      //  uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9',
+      //  rolId: 9, // <-- Asegúrate de usar el ID real del rol del usuario
+      //  ),
 
-      //OnboardingScreen(),
+      OnboardingScreen(),
       //MenuScreen(uid: 'c5ead8ec-bd66-4d9f-81a1-2399ed4fb3c9'),
       //
     );

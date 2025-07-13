@@ -7,9 +7,9 @@ class VentaRepository {
   VentaRepository(this._supabase);
 
 
+// En venta_repository.dart
   Future<bool> verificarStockDisponible(int idProducto, int cantidad) async {
     try {
-      // Obtener el stock disponible del producto
       final response = await _supabase
           .from('productos')
           .select('cantidad_disponible')
@@ -17,14 +17,40 @@ class VentaRepository {
           .single();
 
       if (response == null) {
+        print('Producto con ID $idProducto no encontrado para verificar stock.');
         return false;
       }
 
-      double stockDisponible = response['cantidad_disponible'] ?? 0;
-      // Verificar si la cantidad que se desea vender es mayor que el stock disponible
+      final stockValue = response['cantidad_disponible'];
+
+      if (stockValue == null) {
+        print('Stock disponible es null para el producto ID $idProducto.');
+        return false; // Producto encontrado pero sin valor de stock
+      }
+
+      double stockDisponible;
+      if (stockValue is int) {
+        stockDisponible = stockValue.toDouble();
+      } else if (stockValue is double) {
+        stockDisponible = stockValue;
+      } else if (stockValue is String) { // En caso de que venga como String
+        stockDisponible = double.tryParse(stockValue) ?? 0.0;
+      }
+      else {
+        print('Tipo inesperado para cantidad_disponible: ${stockValue.runtimeType}. Valor: $stockValue');
+        return false; // Tipo no manejado
+      }
+
+      print('Stock disponible para ID $idProducto: $stockDisponible (tipo: ${stockDisponible.runtimeType})');
+      print('Cantidad a vender: $cantidad (tipo: ${cantidad.runtimeType})');
+
+      // La 'cantidad' que se pasa a la función es int.
+      // La comparación entre int y double es válida y funciona como se espera.
       return cantidad <= stockDisponible;
-    } catch (e) {
-      print('Error al verificar stock disponible: $e');
+
+    } catch (e, s) { // Agrega 's' para el stack trace, muy útil para depurar
+      print('Error al verificar stock disponible para ID $idProducto: $e');
+      print('Stack trace: $s');
       return false;
     }
   }
@@ -38,27 +64,36 @@ class VentaRepository {
     required List<Map<String, dynamic>> detalles,
   }) async {
     try {
+      // Convertir todos los precios a double (en caso de que vengan como int)
+      final detallesConPrecioCorrecto = detalles.map((d) {
+        return {
+          'id_producto': d['id_producto'],
+          'cantidad': d['cantidad'],
+          'precio_unitario': (d['precio'] is int) ? (d['precio'] as int).toDouble() : d['precio'],  // Conversión a double si es necesario
+        };
+      }).toList();
+
+      // Imprime los detalles con los precios convertidos a double
+      print('Detalles con precio correcto: $detallesConPrecioCorrecto');
+
       final response = await _supabase.rpc('fn_registrar_venta', params: {
         'p_id_cliente': idCliente,
         'p_id_usuario': idUsuario,
         'p_fecha_venta': fechaVenta.toIso8601String(),
         'p_total': total,
-        'p_detalles': detalles.map((d) => {
-          'id_producto': d['id_producto'],
-          'cantidad': d['cantidad'],
-          'precio_unitario': d['precio'],
-        }).toList(),
+        'p_detalles': detallesConPrecioCorrecto,
       });
 
-      // Suponiendo que la respuesta es un ID de venta
-      final idVenta = response as int?; // Asegúrate de que sea un int
-
+      final idVenta = response as int?;
+      print('Venta registrada con ID: $idVenta');
       return idVenta;
     } catch (e) {
       print('Error al registrar venta: $e');
       return null;
     }
   }
+
+
 
 
   Future<List<Venta>> obtenerVentas() async {
